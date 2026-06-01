@@ -894,7 +894,8 @@ PubSubClient <span class="cf">mqtt</span>(espClient);
     <button onclick="saveKey()" style="padding:2px 7px;border-radius:4px;border:1px solid var(--grR);background:var(--grB);color:var(--gr);font-size:11px;cursor:pointer">Lưu</button>
   </div>
   <div class="iot-quick-actions" style="display: flex; gap: 8px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;">
-      <button onclick="sendMsg('Hãy cho tôi sơ đồ chân (Pinout) của vi điều khiển PIC16F877A')" class="quick-btn">📌 Pinout PIC16F877A</button>
+      <button onclick="checkCode()" class="quick-btn" style="border-color: var(--gr); color: var(--gr); font-weight: bold; flex-shrink: 0;">🐞 Review Code</button>
+    <button onclick="sendMsg('Hãy cho tôi sơ đồ chân (Pinout) của vi điều khiển PIC16F877A')" class="quick-btn">📌 Pinout PIC16F877A</button>
       <button onclick="sendMsg('Cách kết nối cảm biến nhiệt độ, độ ẩm DHT11 và viết code đọc dữ liệu')" class="quick-btn">🌡️ Đo Nhiệt độ/Độ ẩm</button>
       <button onclick="sendMsg('Phân tích mạch băm xung một chiều song song DC-DC (Buck-Boost) tải RLE')" class="quick-btn">⚡ Mạch Buck-Boost</button>
   </div>
@@ -1254,6 +1255,27 @@ function sendQuickMsg(text) {
     
     inputField.value = text;
     sendButton.click(); // Giả lập hành động bấm nút gửi
+}
+// Hàm chuyên dụng để Review Code Nhúng
+function checkCode() {
+    const inputField = document.getElementById('chat-input');
+    const code = inputField.value.trim();
+
+    // 1. Nếu người dùng chưa nhập gì, điền sẵn mẫu gợi ý
+    if (!code || code === "Hãy kiểm tra giúp tôi đoạn mã C/C++ này:\n\n[Dán mã nguồn của bạn vào đây]") {
+        inputField.value = "Hãy kiểm tra giúp tôi đoạn mã C/C++ này:\n\n[Dán mã nguồn của bạn vào đây]";
+        autoResize(inputField);
+        inputField.focus(); // Nháy con trỏ chuột vào ô nhập
+        return;
+    }
+
+    // 2. Nếu đã có code, bọc nó vào câu lệnh ép AI đóng vai chuyên gia
+    const prompt = `Hãy đóng vai một chuyên gia lập trình nhúng. Vui lòng review đoạn code C/C++ sau. Hãy tìm các lỗi logic (nếu có), tối ưu vòng lặp delay, và kiểm tra giúp tôi việc khai báo cấu hình chân I/O:\n\n\`\`\`cpp\n${code}\n\`\`\``;
+
+    // 3. Xóa nội dung trong ô nhập và tiến hành gửi cho AI
+    inputField.value = '';
+    autoResize(inputField);
+    sendMsg(prompt);
 }
 </script>
 </body>
