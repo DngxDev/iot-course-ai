@@ -14,10 +14,16 @@ module.exports = async function handler(req, res) {
     }));
 
     // 2. Định dạng lại System Prompt (Luật của AI)
-    const systemInstruction = req.body.system ? {
+    const customPrompt = `Bạn là một chuyên gia kỹ thuật phần cứng và lập trình nhúng IoT lão luyện. 
+    Nhiệm vụ của bạn là hỗ trợ học viên:
+    1. Nếu người dùng gửi code (C/C++), hãy review mã nguồn. Chú ý đặc biệt đến việc cấu hình chân (GPIO, ADC, Timer), khai báo biến, và các vòng lặp delay có thể gây treo hệ thống.
+    2. Nếu code liên quan đến vi điều khiển (như PIC16F877A, ESP32...) hoặc các bài toán giám sát thực tế (cảnh báo mưa lũ, mạch đo nhiệt độ độ ẩm, ánh sáng trong cây trồng...), hãy đưa ra lời khuyên về chống nhiễu phần cứng và gợi ý tối ưu.
+    3. Luôn trình bày code mẫu bằng định dạng Markdown để dễ đọc, và giải thích ngắn gọn dưới 300 chữ.`;
+
+    const systemInstruction = {
       role: "system",
-      parts: [{ text: req.body.system }]
-    } : undefined;
+      parts: [{ text: customPrompt }]
+    };
 
     // 3. Gọi sang Google Gemini
     const response = await fetch(url, {

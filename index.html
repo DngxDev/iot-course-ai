@@ -178,6 +178,25 @@ code{font-family:monospace;font-size:12px;background:var(--bg3);padding:1px 5px;
 
 /* Syntax highlight colors */
 .ck{color:#a78bfa}.cf{color:#60a5fa}.cn{color:#fbbf24}.cs{color:#22d3a4}.ct{color:#fb923c}.cp{color:#f472b6}.cc{color:#4a6070;font-style:italic}
+/* Nút tra cứu nhanh IoT */
+.iot-quick-actions::-webkit-scrollbar { height: 3px; }
+.iot-quick-actions::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 3px; }
+.quick-btn { 
+  background-color: var(--bg3); 
+  color: var(--hi); 
+  border: 1px solid var(--bd2); 
+  border-radius: 15px; 
+  padding: 5px 12px; 
+  font-size: 11px; 
+  cursor: pointer; 
+  white-space: nowrap; 
+  transition: all 0.2s; 
+}
+.quick-btn:hover { 
+  background-color: var(--bg4); 
+  color: var(--tx); 
+  border-color: var(--bd); 
+}
 </style>
 </head>
 <body>
@@ -874,6 +893,11 @@ PubSubClient <span class="cf">mqtt</span>(espClient);
     <input id="api-key-input" placeholder="sk-ant-..." style="padding:2px 6px;border-radius:4px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-size:11px;width:120px;margin:0 4px">
     <button onclick="saveKey()" style="padding:2px 7px;border-radius:4px;border:1px solid var(--grR);background:var(--grB);color:var(--gr);font-size:11px;cursor:pointer">Lưu</button>
   </div>
+  <div class="iot-quick-actions" style="display: flex; gap: 8px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;">
+      <button onclick="sendMsg('Hãy cho tôi sơ đồ chân (Pinout) của vi điều khiển PIC16F877A')" class="quick-btn">📌 Pinout PIC16F877A</button>
+      <button onclick="sendMsg('Cách kết nối cảm biến nhiệt độ, độ ẩm DHT11 và viết code đọc dữ liệu')" class="quick-btn">🌡️ Đo Nhiệt độ/Độ ẩm</button>
+      <button onclick="sendMsg('Phân tích mạch băm xung một chiều song song DC-DC (Buck-Boost) tải RLE')" class="quick-btn">⚡ Mạch Buck-Boost</button>
+  </div>
   <div class="chat-input-row">
     <textarea class="chat-input" id="chat-input" placeholder="Hỏi bất cứ điều gì..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
     <button class="send-btn" id="send-btn" onclick="sendMsg()">↑</button>
@@ -1224,6 +1248,13 @@ function autoResize(el) {
 
 // Init
 reinitPage();
+function sendQuickMsg(text) {
+    const inputField = document.getElementById('chat-input'); // Tên ID ô input của bạn
+    const sendButton = document.getElementById('send-btn');   // Tên ID nút gửi của bạn
+    
+    inputField.value = text;
+    sendButton.click(); // Giả lập hành động bấm nút gửi
+}
 </script>
 </body>
 </html>
