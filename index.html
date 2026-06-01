@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Khóa học IoT + AI Tutor</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><rect x='4' y='4' width='16' height='16' rx='3' fill='%230e1117' stroke='%2322d3a4' stroke-width='2'/><path d='M4 8H2M4 16H2M20 8h2M20 16h2M8 4V2M16 4V2M8 20v2M16 20v2' stroke='%2360a5fa' stroke-width='2' stroke-linecap='round'/><circle cx='12' cy='12' r='2.5' fill='%2322d3a4'/></svg>">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -197,6 +200,10 @@ code{font-family:monospace;font-size:12px;background:var(--bg3);padding:1px 5px;
   color: var(--tx); 
   border-color: var(--bd); 
 }
+/* Làm đẹp hiển thị Markdown trong khung chat AI */
+.msg-bubble pre { margin: 8px 0; padding: 10px; border-radius: 6px; font-size: 12px; overflow-x: auto; }
+.msg-bubble p { margin-bottom: 6px; }
+.msg-bubble p:last-child { margin-bottom: 0; }
 </style>
 </head>
 <body>
@@ -1150,11 +1157,22 @@ function renderQuickQ(id) {
   container.innerHTML = qs.map(q => `<button class="q-btn" onclick="sendMsg('${q.replace(/'/g,"\\'")}')">❓ ${q}</button>`).join('');
 }
 
+marked.setOptions({
+  highlight: function(code, lang) {
+    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+    return hljs.highlight(code, { language }).value;
+  }
+});
+
 function addMsg(role, text) {
   const container = document.getElementById('chat-msgs');
   const div = document.createElement('div');
   div.className = 'msg ' + role;
-  div.innerHTML = `<div class="msg-icon">${role==='ai'?'🤖':'👤'}</div><div class="msg-bubble">${text.replace(/\n/g,'<br>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>')}</div>`;
+  
+  // Trí tuệ ở đây: Nếu là AI thì render Markdown (tô màu code), nếu là User thì giữ text thường
+  const formattedText = role === 'ai' ? marked.parse(text) : text.replace(/\n/g,'<br>');
+  
+  div.innerHTML = `<div class="msg-icon">${role==='ai'?'🤖':'👤'}</div><div class="msg-bubble">${formattedText}</div>`;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
 }
@@ -1186,14 +1204,12 @@ async function sendMsg(text) {
   chatHistory.push({ role:'user', content: msg });
 
   try {
-    const sysPrompt = `Bạn là gia sư dạy lập trình nhúng IoT cho người Việt Nam mới học. Học viên đang học bài: "${TITLES[currentLesson]}".
-Quy tắc:
-- Luôn trả lời bằng tiếng Việt, đơn giản như dạy người chưa biết gì
-- Dùng analogie thực tế khi giải thích khái niệm
-- Khi có code, thêm comment tiếng Việt
-- Trả lời ngắn gọn đủ ý (150-350 từ)
-- Khuyến khích thực hành`;
-
+const sysPrompt = `Bạn là một kỹ sư phần cứng và gia sư lập trình nhúng IoT. 
+TÌNH HUỐNG HIỆN TẠI: Học viên đang mở học phần "${TITLES[currentLesson]}".
+NHIỆM VỤ CỦA BẠN:
+1. LUÔN ưu tiên trả lời và đưa ra ví dụ liên quan trực tiếp đến bài học "${TITLES[currentLesson]}". (Ví dụ: Nếu học viên đang học bài Nút nhấn, hãy lấy ví dụ về Nút nhấn thay vì Cảm biến).
+2. Nếu người dùng dán code C/C++ vào, hãy đóng vai chuyên gia review code, tìm lỗi logic, kiểm tra khai báo GPIO và tối ưu hóa vòng lặp.
+3. Luôn sử dụng Markdown để định dạng câu trả lời. Trả lời ngắn gọn, dễ hiểu bằng tiếng Việt (tối đa 300 từ).`;
    // Gọi API nội bộ của Vercel
     const resp = await fetch('/api/chat', {
       method: 'POST',
