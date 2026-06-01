@@ -5,7 +5,7 @@ export default async function handler(req, res) {
 
   try {
     const apiKey = process.env.GEMINI_API_KEY; // Lấy key của Google từ Vercel
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     // 1. Dịch lịch sử chat sang chuẩn của Gemini (assistant -> model)
     const geminiMessages = req.body.messages.map(msg => ({
