@@ -7,11 +7,15 @@ module.exports = async function handler(req, res) {
     const apiKey = process.env.GEMINI_API_KEY; // Lấy key của Google từ Vercel
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
-    // 1. Dịch lịch sử chat sang chuẩn của Gemini (assistant -> model)
-    const geminiMessages = req.body.messages.map(msg => ({
-      role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: msg.content }]
-    }));
+   // 1. Dịch lịch sử chat sang chuẩn của Gemini (assistant -> model)
+    const geminiMessages = req.body.messages.map(msg => {
+      // Nếu Frontend có gửi mảng "parts" (chứa ảnh + chữ) thì dùng, nếu không thì bọc chữ vào chuẩn cũ
+      let msgParts = msg.parts ? msg.parts : [{ text: msg.content }];
+      return {
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: msgParts
+      };
+    });
 
     // 2. Định dạng lại System Prompt (Luật của AI)
     const customPrompt = `Bạn là một chuyên gia kỹ thuật phần cứng và lập trình nhúng IoT lão luyện. 

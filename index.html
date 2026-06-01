@@ -906,8 +906,20 @@ PubSubClient <span class="cf">mqtt</span>(espClient);
       <button onclick="sendMsg('Cách kết nối cảm biến nhiệt độ, độ ẩm DHT11 và viết code đọc dữ liệu')" class="quick-btn">🌡️ Đo Nhiệt độ/Độ ẩm</button>
       <button onclick="sendMsg('Phân tích mạch băm xung một chiều song song DC-DC (Buck-Boost) tải RLE')" class="quick-btn">⚡ Mạch Buck-Boost</button>
   </div>
+  <div id="image-preview" style="display:none; padding: 8px 12px; background: var(--bg3); border-top: 1px solid var(--bd);">
+    <div style="position: relative; display: inline-block;">
+      <img id="preview-img" style="max-height: 90px; border-radius: 6px; border: 1px solid var(--bd2);">
+      <button onclick="removeImage()" style="position: absolute; top: -8px; right: -8px; background: var(--re); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">✕</button>
+    </div>
+  </div>
+
   <div class="chat-input-row">
-    <textarea class="chat-input" id="chat-input" placeholder="Hỏi bất cứ điều gì..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <label for="file-upload" style="cursor: pointer; display: flex; align-items: center; padding: 0 8px; color: var(--mu); font-size: 18px;" title="Tải ảnh lên">
+      📎
+    </label>
+    <input id="file-upload" type="file" accept="image/png, image/jpeg, image/webp, image/heic" style="display: none" onchange="handleImageSelect(event)">
+    
+    <textarea class="chat-input" id="chat-input" placeholder="Hỏi (hoặc gửi ảnh mạch điện)..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
     <button class="send-btn" id="send-btn" onclick="sendMsg()">↑</button>
   </div>
 </div>
@@ -1164,15 +1176,20 @@ marked.setOptions({
   }
 });
 
-function addMsg(role, text) {
+function addMsg(role, text, imgSrc = null) {
   const container = document.getElementById('chat-msgs');
   const div = document.createElement('div');
   div.className = 'msg ' + role;
   
-  // Trí tuệ ở đây: Nếu là AI thì render Markdown (tô màu code), nếu là User thì giữ text thường
   const formattedText = role === 'ai' ? marked.parse(text) : text.replace(/\n/g,'<br>');
   
-  div.innerHTML = `<div class="msg-icon">${role==='ai'?'🤖':'👤'}</div><div class="msg-bubble">${formattedText}</div>`;
+  // Nếu có ảnh, chèn thẻ <img> vào trước đoạn văn bản
+  let imgHTML = '';
+  if (imgSrc) {
+      imgHTML = `<img src="${imgSrc}" style="max-width: 100%; border-radius: 6px; margin-bottom: 8px;"><br>`;
+  }
+  
+  div.innerHTML = `<div class="msg-icon">${role==='ai'?'🤖':'👤'}</div><div class="msg-bubble">${imgHTML}${formattedText}</div>`;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
 }
@@ -1292,6 +1309,115 @@ function checkCode() {
     inputField.value = '';
     autoResize(inputField);
     sendMsg(prompt);
+}
+// ==========================================
+// 1. LOGIC XỬ LÝ ẢNH
+// ==========================================
+let selectedImageBase64 = null;
+let selectedImageMimeType = null;
+let selectedImageSrc = null;
+
+function handleImageSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        selectedImageSrc = e.target.result;
+        selectedImageBase64 = e.target.result.split(',')[1];
+        selectedImageMimeType = file.type;
+        
+        document.getElementById('image-preview').style.display = 'block';
+        document.getElementById('preview-img').src = selectedImageSrc;
+        document.getElementById('chat-input').focus(); // Nháy chuột vào ô gõ chữ luôn
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeImage() {
+    selectedImageBase64 = null;
+    selectedImageMimeType = null;
+    selectedImageSrc = null;
+    document.getElementById('file-upload').value = '';
+    document.getElementById('image-preview').style.display = 'none';
+}
+
+// ==========================================
+// 2. HÀM SEND TIN NHẮN TÍCH HỢP ẢNH
+// ==========================================
+async function sendMsg(text) {
+  const input = document.getElementById('chat-input');
+  const msg = text || input.value.trim();
+  
+  // Chặn nếu bấm gửi mà không có ảnh lẫn chữ
+  if (!msg && !selectedImageBase64) return;
+  if (isTyping) return;
+  
+  input.value = '';
+  autoResize(input);
+  
+  // In tin nhắn ra màn hình kèm ảnh (nếu có)
+  addMsg('user', msg, selectedImageSrc);
+  
+  isTyping = true;
+  document.getElementById('send-btn').disabled = true;
+  showTyping();
+
+  // Đóng gói dữ liệu ảnh theo chuẩn của Google Gemini
+  let userParts = [];
+  if (msg) userParts.push({ text: msg });
+  if (selectedImageBase64) {
+      userParts.push({
+          inlineData: { data: selectedImageBase64, mimeType: selectedImageMimeType }
+      });
+  }
+  
+  // Đẩy nguyên khối Parts vào lịch sử thay vì đẩy mỗi chữ
+  chatHistory.push({ role: 'user', parts: userParts });
+  
+  // Xóa ảnh ở khung preview
+  removeImage();
+
+  try {
+    const sysPrompt = `Bạn là một kỹ sư phần cứng và gia sư lập trình nhúng IoT. 
+TÌNH HUỐNG: Học viên đang mở bài "${TITLES[currentLesson]}".
+NHIỆM VỤ:
+1. Trả lời đúng trọng tâm bài học.
+2. NẾU CÓ ẢNH MẠCH ĐIỆN: Soi thật kỹ các chân cắm, chiều linh kiện (LED, tụ...) hoặc xem sơ đồ đấu nối có sai dây không.
+3. NẾU CÓ ẢNH LỖI CODE/IDE: Chỉ ra dòng sai và hướng dẫn cách fix.
+4. Trả lời ngắn gọn, định dạng Markdown rõ ràng.`;
+
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: sysPrompt,
+        messages: chatHistory,
+      })
+    });
+
+    const data = await resp.json();
+    
+    // Đoạn check bao quát này sẽ nhận được câu trả lời dù Backend Vercel của bạn trả về data kiểu gì
+    let reply = "";
+    if (data.candidates && data.candidates[0].content) {
+         reply = data.candidates[0].content.parts[0].text; // Chuẩn Google
+    } else if (data.content) {
+         reply = (data.content || []).map(b => b.type==='text'?b.text:'').join(''); // Chuẩn cũ
+    } else {
+         reply = data.replyText || JSON.stringify(data); 
+    }
+    
+    hideTyping();
+    addMsg('ai', reply || 'Xin lỗi, có lỗi xảy ra.');
+    chatHistory.push({ role:'assistant', content: reply });
+  } catch(e) {
+    hideTyping();
+    addMsg('ai', '⚠️ Không kết nối được server AI. Kiểm tra internet và thử lại.');
+    chatHistory.pop();
+  } finally {
+    isTyping = false;
+    document.getElementById('send-btn').disabled = false;
+  }
 }
 </script>
 </body>
