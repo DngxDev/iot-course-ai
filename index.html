@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Khóa học IoT + AI Tutor</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0e1117;color:#e2e8f0;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+:root{--bg:#0e1117;--bg2:#161b27;--bg3:#1e2537;--bg4:#26334d;--bd:#2d3a50;--bd2:#3d4f6e;--tx:#e2e8f0;--mu:#8499bb;--hi:#4a6070;--gr:#22d3a4;--bl:#60a5fa;--am:#fbbf24;--re:#f87171;--pu:#a78bfa;--or:#fb923c}
+
+/* Layout */
+.shell{display:flex;flex:1;overflow:hidden}
+.sidebar{width:240px;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;transition:width .2s;flex-shrink:0}
+.sidebar.collapsed{width:0;overflow:hidden}
+.main{flex:1;overflow-y:auto;background:var(--bg)}
+.main::-webkit-scrollbar{width:5px}
+.main::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+
+/* Sidebar */
+.side-top{padding:12px 14px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.side-logo{font-size:12px;font-weight:700;color:var(--gr);letter-spacing:.06em;text-transform:uppercase}
+.side-sub{font-size:11px;color:var(--hi);margin-top:2px}
+.prog-row{display:flex;justify-content:space-between;font-size:10px;color:var(--hi);margin-top:8px;margin-bottom:3px}
+.prog-bar{height:3px;background:var(--bg4);border-radius:9px;overflow:hidden}
+.prog-fill{height:100%;background:var(--gr);transition:width .4s;border-radius:9px}
+.nav-scroll{flex:1;overflow-y:auto;padding:4px 0}
+.nav-scroll::-webkit-scrollbar{width:3px}
+.nav-scroll::-webkit-scrollbar-thumb{background:var(--bd2)}
+.mod-hdr{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;user-select:none}
+.mod-arrow{font-size:10px;color:var(--hi);transition:transform .2s}
+.mod-arrow.open{transform:rotate(90deg)}
+.mod-title{font-size:11px;font-weight:600;color:var(--mu);flex:1}
+.les-list{display:none;padding:0 0 4px}
+.les-list.open{display:block}
+.les-btn{padding:6px 12px 6px 30px;cursor:pointer;font-size:12px;color:var(--hi);border-left:2px solid transparent;transition:all .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.les-btn:hover{color:var(--tx);background:rgba(255,255,255,.03)}
+.les-btn.active{color:var(--gr);border-left-color:var(--gr);background:rgba(34,211,164,.07)}
+.les-btn.done{color:var(--mu)}
+
+/* Lesson content */
+.lesson{display:none;padding:28px 36px 80px;max-width:820px;animation:fi .18s ease}
+.lesson.show{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.les-tag{font-size:11px;font-weight:700;color:var(--gr);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.les-title{font-size:22px;font-weight:700;color:var(--tx);margin-bottom:20px;line-height:1.3}
+.obj{background:rgba(34,211,164,.07);border:1px solid rgba(34,211,164,.22);border-radius:8px;padding:11px 14px;margin-bottom:20px}
+.obj-lbl{font-size:11px;font-weight:700;color:var(--gr);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.obj li{font-size:13px;color:#6ee7c8;margin-bottom:3px;list-style:none}
+.obj li::before{content:'→ ';color:var(--gr)}
+
+h3{font-size:15px;font-weight:600;color:var(--tx);margin:22px 0 7px}
+h4{font-size:13px;font-weight:600;color:var(--tx);margin:14px 0 5px}
+p{font-size:14px;line-height:1.78;color:var(--mu);margin-bottom:8px}
+strong{color:var(--tx)}
+code{font-family:monospace;font-size:12px;background:var(--bg3);padding:1px 5px;border-radius:4px;color:var(--am)}
+
+/* Boxes */
+.box{border-radius:8px;padding:10px 14px;margin:9px 0;font-size:13px;line-height:1.65;border:1px solid}
+.box-lbl{font-weight:700;font-size:11px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px}
+.box-info{background:rgba(96,165,250,.08);border-color:rgba(96,165,250,.25);color:#93c5fd}
+.box-tip{background:rgba(34,211,164,.08);border-color:rgba(34,211,164,.25);color:#6ee7c8}
+.box-warn{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.25);color:#fcd34d}
+.box-err{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.25);color:#fca5a5}
+
+/* Code block */
+.code-wrap{position:relative;margin:10px 0}
+.code-wrap pre{background:#0d1521;border:1px solid var(--bd2);border-radius:8px;padding:13px 15px;font-family:'Cascadia Code','Fira Code',monospace;font-size:12.5px;line-height:1.8;overflow-x:auto;tab-size:2}
+.copy-btn{position:absolute;top:7px;right:7px;padding:3px 9px;border-radius:5px;border:1px solid var(--bd2);background:var(--bg4);color:var(--mu);font-size:11px;cursor:pointer;transition:all .15s}
+.copy-btn:hover{background:var(--bg3);color:var(--tx)}
+
+/* Grid cards */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin:10px 0}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:11px 13px}
+.card-icon{font-size:20px;margin-bottom:7px}
+.card-title{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:4px}
+.card-body{font-size:12px;color:var(--mu);line-height:1.55}
+
+/* Steps */
+.step{display:flex;gap:11px;margin-bottom:8px}
+.step-n{width:26px;height:26px;border-radius:50%;background:rgba(34,211,164,.1);color:var(--gr);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-body{flex:1;padding-top:3px}
+.step-title{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:2px}
+.step-desc{font-size:13px;color:var(--mu);line-height:1.6}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:9px 0}
+.tbl th{text-align:left;font-size:11px;font-weight:700;color:var(--hi);text-transform:uppercase;letter-spacing:.04em;padding:7px 10px;border-bottom:1px solid var(--bd)}
+.tbl td{padding:7px 10px;border-bottom:1px solid var(--bd);color:var(--mu)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--bg2)}
+.tbl td:first-child{color:var(--tx);font-weight:500}
+
+/* Components */
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:7px;margin:8px 0}
+.comp{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:8px 11px;display:flex;align-items:center;gap:9px}
+.comp-icon{font-size:18px;flex-shrink:0}
+.comp-name{font-size:12px;font-weight:600;color:var(--tx)}
+.comp-det{font-size:11px;color:var(--hi)}
+.comp-qty{font-size:11px;font-weight:700;color:var(--gr);margin-top:1px}
+
+/* Nav buttons */
+.nav-btns{display:flex;gap:8px;margin-top:30px;padding-top:20px;border-top:1px solid var(--bd)}
+.btn{padding:9px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid}
+.btn-out{background:transparent;border-color:var(--bd2);color:var(--mu)}
+.btn-out:hover{background:var(--bg2);color:var(--tx)}
+.btn-pri{background:var(--gr);border-color:var(--gr);color:#071a14}
+.btn-pri:hover{opacity:.9}
+
+/* Interactive sims */
+.sim{background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:14px;margin:10px 0}
+.sim-title{font-size:12px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px}
+.led-dot{width:42px;height:42px;border-radius:50%;background:#1a2020;border:2px solid #2a3030;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.led-dot.on{background:var(--gr);border-color:#10b981;box-shadow:0 0 18px rgba(34,211,164,.5)}
+.led-dot.on-red{background:var(--re);border-color:#ef4444;box-shadow:0 0 18px rgba(248,113,113,.5)}
+.led-dot.on-amber{background:var(--am);border-color:#f59e0b;box-shadow:0 0 18px rgba(251,191,36,.5)}
+.range-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.range-row label{font-size:12px;color:var(--mu);width:90px;flex-shrink:0}
+.range-row input[type=range]{flex:1;accent-color:var(--gr);cursor:pointer}
+.range-row span{font-size:12px;font-weight:700;color:var(--am);width:60px;text-align:right}
+.val-chip{background:var(--bg4);border-radius:6px;padding:5px 10px;font-size:12px;display:inline-block;margin:3px}
+.val-chip .lbl{color:var(--hi)}
+.val-chip .val{font-weight:700;color:var(--gr);margin-left:4px}
+.sim-btn{padding:6px 14px;border-radius:6px;border:1px solid rgba(34,211,164,.3);background:rgba(34,211,164,.08);color:var(--gr);font-size:12px;font-weight:600;cursor:pointer;margin-right:6px;transition:all .15s}
+.sim-btn:hover{background:rgba(34,211,164,.16)}
+.sim-btn.active{background:rgba(34,211,164,.2)}
+
+/* Toggle btn at top */
+.top-bar{height:44px;background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0}
+.toggle-side{padding:5px 10px;border-radius:6px;border:1px solid var(--bd2);background:transparent;color:var(--mu);cursor:pointer;font-size:13px}
+.toggle-side:hover{color:var(--tx)}
+.top-lesson{font-size:12px;color:var(--mu);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ai-trigger{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;border:1px solid rgba(34,211,164,.3);background:rgba(34,211,164,.08);color:var(--gr);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;flex-shrink:0}
+.ai-trigger:hover{background:rgba(34,211,164,.16)}
+.ai-dot{width:7px;height:7px;border-radius:50%;background:var(--gr);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Chat panel */
+.chat-panel{position:fixed;right:0;top:0;bottom:0;width:330px;background:var(--bg2);border-left:1px solid var(--bd);display:flex;flex-direction:column;z-index:100;box-shadow:-4px 0 20px rgba(0,0,0,.5);transition:transform .25s}
+.chat-panel.hidden{transform:translateX(100%)}
+.chat-hdr{padding:11px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.chat-avatar{width:32px;height:32px;border-radius:50%;background:rgba(34,211,164,.1);border:1px solid rgba(34,211,164,.3);display:flex;align-items:center;justify-content:center;font-size:16px}
+.chat-info{flex:1}
+.chat-name{font-size:13px;font-weight:700;color:var(--tx)}
+.chat-ctx{font-size:11px;color:var(--gr)}
+.chat-close{width:26px;height:26px;border-radius:5px;border:1px solid var(--bd2);background:transparent;color:var(--mu);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+.chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.chat-msgs::-webkit-scrollbar{width:3px}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--bd2)}
+.msg{display:flex;gap:8px;max-width:100%}
+.msg.user{flex-direction:row-reverse}
+.msg-bubble{padding:9px 12px;border-radius:10px;font-size:13px;line-height:1.65;max-width:85%;white-space:pre-wrap;word-break:break-word}
+.msg.ai .msg-bubble{background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);border-radius:10px 10px 10px 3px}
+.msg.user .msg-bubble{background:rgba(34,211,164,.1);border:1px solid rgba(34,211,164,.25);color:#e2e8f0;border-radius:10px 10px 3px 10px}
+.msg-icon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px}
+.msg.ai .msg-icon{background:rgba(34,211,164,.1);border:1px solid rgba(34,211,164,.25)}
+.msg.user .msg-icon{background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.25)}
+.typing{display:flex;gap:4px;padding:9px 12px;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;width:52px}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--gr);animation:bounce .8s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,100%{transform:translateY(0);opacity:.3}50%{transform:translateY(-4px);opacity:1}}
+.quick-q{padding:8px 10px;border-top:1px solid var(--bd);display:flex;flex-wrap:wrap;gap:5px}
+.q-btn{font-size:11px;padding:3px 9px;border-radius:99px;border:1px solid var(--bd2);background:var(--bg3);color:var(--mu);cursor:pointer;transition:all .15s;white-space:nowrap}
+.q-btn:hover{color:var(--tx);border-color:var(--bd)}
+.chat-input-row{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--bd);flex-shrink:0}
+.chat-input{flex:1;padding:8px 11px;border-radius:7px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-size:13px;outline:none;font-family:inherit;resize:none;height:36px;min-height:36px;max-height:100px;overflow:hidden}
+.chat-input:focus{border-color:rgba(34,211,164,.4)}
+.send-btn{padding:8px 12px;border-radius:7px;border:1px solid rgba(34,211,164,.3);background:rgba(34,211,164,.1);color:var(--gr);font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0}
+.send-btn:hover{background:rgba(34,211,164,.2)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed}
+.api-notice{font-size:11px;color:var(--hi);padding:5px 10px;text-align:center;background:rgba(251,191,36,.06);border-top:1px solid rgba(251,191,36,.15)}
+.api-notice a{color:var(--am);text-decoration:none}
+
+/* SVG diagrams */
+.svg-wrap{background:#0d1521;border-radius:8px;border:1px solid var(--bd);margin:10px 0;overflow:hidden}
+
+/* Syntax highlight colors */
+.ck{color:#a78bfa}.cf{color:#60a5fa}.cn{color:#fbbf24}.cs{color:#22d3a4}.ct{color:#fb923c}.cp{color:#f472b6}.cc{color:#4a6070;font-style:italic}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <button class="toggle-side" onclick="toggleSidebar()">☰</button>
+  <div class="top-lesson" id="top-lesson">Điện áp, Dòng điện và Điện trở</div>
+  <button class="ai-trigger" onclick="openChat()"><div class="ai-dot"></div>Hỏi AI 🤖</button>
+</div>
+<div class="shell">
+  <div class="sidebar" id="sidebar"><div class="side-top"><div class="side-logo">IoT Embedded</div><div class="side-sub">Lập trình nhúng từ cơ bản</div><div class="prog-row"><span>Tiến độ</span><span id="prog-pct">0%</span></div><div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div><div class="nav-scroll"><div class="mod-hdr" onclick="toggleMod(this)"><div class="mod-arrow open">▶</div><div class="mod-title">⚡ Module 1: Điện tử cơ bản</div></div><div class="les-list open"><div class="les-btn active" id="nav-L11" onclick="goTo('L11')">Điện áp · Dòng điện · Điện trở</div><div class="les-btn" id="nav-L12" onclick="goTo('L12')">Định luật Ohm & Tính mạch</div><div class="les-btn" id="nav-L13" onclick="goTo('L13')">Breadboard & Dụng cụ đo</div></div><div class="mod-hdr" onclick="toggleMod(this)"><div class="mod-arrow">▶</div><div class="mod-title">🤖 Module 2: Vi điều khiển</div></div><div class="les-list"><div class="les-btn" id="nav-L21" onclick="goTo('L21')">MCU là gì? Kiến trúc nội bộ</div><div class="les-btn" id="nav-L22" onclick="goTo('L22')">Cài IDE · Chương trình đầu tiên</div></div><div class="mod-hdr" onclick="toggleMod(this)"><div class="mod-arrow">▶</div><div class="mod-title">💡 Module 3: LED & Output</div></div><div class="les-list"><div class="les-btn" id="nav-L31" onclick="goTo('L31')">Bài 1 · LED Blink</div><div class="les-btn" id="nav-L32" onclick="goTo('L32')">Bài 2 · Đèn giao thông</div><div class="les-btn" id="nav-L33" onclick="goTo('L33')">Bài 3 · PWM – Mờ sáng LED</div></div><div class="mod-hdr" onclick="toggleMod(this)"><div class="mod-arrow">▶</div><div class="mod-title">🔘 Module 4: Input & Nút nhấn</div></div><div class="les-list"><div class="les-btn" id="nav-L41" onclick="goTo('L41')">Bài 4 · Đọc nút nhấn & Pull-up</div><div class="les-btn" id="nav-L42" onclick="goTo('L42')">Bài 5 · Toggle LED & Debounce</div></div><div class="mod-hdr" onclick="toggleMod(this)"><div class="mod-arrow">▶</div><div class="mod-title">📡 Module 5: Cảm biến</div></div><div class="les-list"><div class="les-btn" id="nav-L51" onclick="goTo('L51')">Bài 6 · Biến trở & ADC</div><div class="les-btn" id="nav-L52" onclick="goTo('L52')">Bài 7 · Cảm biến ánh sáng LDR</div><div class="les-btn" id="nav-L53" onclick="goTo('L53')">Bài 8 · DHT22 Nhiệt độ & Độ ẩm</div></div><div class="mod-hdr" onclick="toggleMod(this)"><div class="mod-arrow">▶</div><div class="mod-title">🌐 Module 6: Kết nối IoT</div></div><div class="les-list"><div class="les-btn" id="nav-L61" onclick="goTo('L61')">Bài 9 · ESP32 & WiFi</div><div class="les-btn" id="nav-L62" onclick="goTo('L62')">Bài 10 · MQTT & Cloud</div></div><div class="mod-hdr" onclick="toggleMod(this)"><div class="mod-arrow">▶</div><div class="mod-title">🏆 Dự án tổng hợp</div></div><div class="les-list"><div class="les-btn" id="nav-PRJ" onclick="goTo('PRJ')">Trạm thời tiết IoT mini</div></div></div></div>
+  <div class="main" id="main"><div class="lesson show" id="page-L11">
+<div class="les-tag">Module 1 · Bài 1</div>
+<div class="les-title">Điện áp, Dòng điện và Điện trở</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Giải thích điện áp, dòng điện, điện trở bằng analogie thực tế</li><li>Phân biệt DC và AC</li><li>Hiểu vì sao LED luôn cần điện trở</li><li>Tính được điện trở cần dùng cho LED bất kỳ</li></ul></div>
+<h3>⚡ Analogie đường ống nước</h3>
+<p>Điện rất trừu tượng — hãy tưởng tượng hệ thống <strong>đường ống nước</strong>:</p>
+<div class="card-grid"><div class="card"><div class="card-icon">⚡</div><div class="card-title">Điện áp (Voltage · V)</div><div class="card-body">= <strong>Áp suất nước</strong> đẩy nước chảy. Nguồn 5V 'đẩy' electron mạnh hơn 3.3V. Arduino dùng 5V, ESP32 dùng 3.3V.</div></div><div class="card"><div class="card-icon">💧</div><div class="card-title">Dòng điện (Current · I)</div><div class="card-body">= <strong>Lưu lượng nước</strong> mỗi giây. Electron di chuyển tạo ra dòng điện. Đơn vị: Ampere (A) hay mA. 1A = 1000mA.</div></div><div class="card"><div class="card-icon">🚰</div><div class="card-title">Điện trở (Resistance · R)</div><div class="card-body">= <strong>Van chặn nước</strong> — càng chặt thì dòng chảy càng ít. Đơn vị Ohm (Ω). 1kΩ = 1000Ω.</div></div><div class="card"><div class="card-icon">🔋</div><div class="card-title">Nguồn điện (Battery)</div><div class="card-body">= <strong>Máy bơm</strong> tạo áp suất. USB 5V, pin 3.7V, adapter đều là nguồn DC một chiều.</div></div></div><div class="box box-info"><div class="box-lbl">🔑 Công thức nhớ nhanh</div><strong>V = I × R</strong> &nbsp;|&nbsp; I = V/R &nbsp;|&nbsp; R = V/I<br>Định luật Ohm — biết 2 trong 3 thì tính được cái còn lại.</div>
+<h3>💡 LED và Điện trở</h3>
+<p>LED là linh kiện phổ biến nhất khi học nhúng. Hai đặc điểm quan trọng:</p>
+<div class="card-grid"><div class="card"><div class="card-icon">1️⃣</div><div class="card-title">Cực tính — không cắm ngược</div><div class="card-body">Chân <strong>dài = Anode (+)</strong>. Chân ngắn = Cathode (−) → GND. Cắm ngược: LED không sáng nhưng không hỏng (nếu có điện trở).</div></div><div class="card"><div class="card-icon">2️⃣</div><div class="card-title">Phải có điện trở!</div><div class="card-body">Không có điện trở → dòng không bị giới hạn → LED cháy ngay + có thể hỏng chân GPIO của MCU.</div></div></div><table class="tbl"><thead><tr><th>Màu LED</th><th>Điện áp thuận (Vf)</th><th>Dòng</th><th>Điện trở (nguồn 5V)</th></tr></thead><tbody><tr><td>🔴 Đỏ</td><td>1.8–2.1V</td><td>20mA</td><td><strong>150Ω → dùng 220Ω</strong></td></tr><tr><td>🟡 Vàng</td><td>2.0–2.2V</td><td>20mA</td><td>150Ω → dùng 220Ω</td></tr><tr><td>🟢 Xanh lá</td><td>3.0–3.3V</td><td>20mA</td><td>85Ω → dùng 100Ω</td></tr><tr><td>🔵 Xanh dương</td><td>3.0–3.5V</td><td>20mA</td><td>75Ω → dùng 100Ω</td></tr></tbody></table><div class="box box-tip"><div class="box-lbl">💡 Mẹo an toàn</div>Không chắc thì dùng <strong>220Ω cho mọi LED với nguồn 5V</strong>. LED hơi mờ hơn nhưng tuyệt đối an toàn.</div>
+<h3>🧮 Máy tính điện trở LED</h3>
+<div class="sim" id="ohm-calc">
+  <div class="sim-title">Tính điện trở cần dùng</div>
+  <div class="range-row"><label>Nguồn (V)</label><input type="range" min="3" max="12" value="5" step="0.5" oninput="calcR()"><span id="vcc-val">5V</span></div>
+  <div class="range-row"><label>Vf LED (V)</label><input type="range" min="1.5" max="3.5" value="2.0" step="0.1" oninput="calcR()"><span id="vf-val">2.0V</span></div>
+  <div class="range-row"><label>Dòng (mA)</label><input type="range" min="5" max="30" value="20" oninput="calcR()"><span id="ma-val">20mA</span></div>
+  <div id="calc-result" style="margin-top:10px">
+    <span class="val-chip"><span class="lbl">R cần:</span><span class="val" id="r-need">150Ω</span></span>
+    <span class="val-chip"><span class="lbl">Dùng điện trở:</span><span class="val" id="r-use">150Ω</span></span>
+    <span class="val-chip"><span class="lbl">Dòng thực tế:</span><span class="val" id="i-real">20mA</span></span>
+  </div>
+</div><div class="box box-warn"><div class="box-lbl">⚠️ An toàn quan trọng</div>KHÔNG BAO GIỜ kết nối MCU với điện AC 220V ổ cắm. Luôn dùng adapter USB 5V hoặc nguồn DC.</div>
+<div class="nav-btns"><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('L12')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-L12">
+<div class="les-tag">Module 1 · Bài 2</div>
+<div class="les-title">Định luật Ohm & Tính mạch</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Áp dụng V=I×R để tính toán mạch thực tế</li><li>Đọc giá trị điện trở qua màu sắc (color code)</li><li>Phân biệt mạch nối tiếp và song song</li><li>Tính điện trở cho LED một cách chính xác</li></ul></div>
+<h3>📐 Định luật Ohm — Công thức vàng</h3>
+<div style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:16px;margin:10px 0;text-align:center">
+  <div style="font-size:22px;font-weight:700;color:var(--tx);font-family:monospace">V = I × R</div>
+  <div style="display:flex;justify-content:center;gap:20px;margin-top:12px;flex-wrap:wrap">
+    <div style="background:var(--bg4);border-radius:7px;padding:8px 14px;text-align:center"><div style="font-size:10px;color:var(--hi);margin-bottom:3px">Tìm điện áp</div><div style="font-size:14px;font-weight:700;color:var(--gr);font-family:monospace">V = I × R</div></div>
+    <div style="background:var(--bg4);border-radius:7px;padding:8px 14px;text-align:center"><div style="font-size:10px;color:var(--hi);margin-bottom:3px">Tìm dòng điện</div><div style="font-size:14px;font-weight:700;color:var(--gr);font-family:monospace">I = V ÷ R</div></div>
+    <div style="background:var(--bg4);border-radius:7px;padding:8px 14px;text-align:center"><div style="font-size:10px;color:var(--hi);margin-bottom:3px">Tìm điện trở</div><div style="font-size:14px;font-weight:700;color:var(--gr);font-family:monospace">R = V ÷ I</div></div>
+  </div>
+</div><div class="box box-info"><div class="box-lbl">Ví dụ 1 — Tính R cho LED đỏ</div>Nguồn 5V | LED đỏ: Vf=2V, If=20mA=0.02A<br><strong>Bước 1:</strong> Áp rơi trên R = 5-2 = 3V<br><strong>Bước 2:</strong> R = 3/0.02 = <strong>150Ω</strong> → dùng 150Ω hoặc 220Ω</div><div class="box box-info"><div class="box-lbl">Ví dụ 2 — Tính dòng qua điện trở 1kΩ</div>Điện trở 1000Ω, nguồn 5V:<br><strong>I = V/R = 5/1000 = 0.005A = 5mA</strong> → Dòng nhỏ, an toàn cho GPIO</div>
+<h3>🌈 Đọc màu điện trở (4 vạch)</h3><table class="tbl"><thead><tr><th>Màu</th><th>Vạch 1&2 (số)</th><th>Vạch 3 (nhân)</th><th>Vạch 4 (dung sai)</th></tr></thead><tbody><tr><td>⬛ Đen</td><td>0</td><td>×1</td><td>—</td></tr><tr><td>🟤 Nâu</td><td>1</td><td>×10</td><td>±1%</td></tr><tr><td>🔴 Đỏ</td><td>2</td><td>×100</td><td>±2%</td></tr><tr><td>🟠 Cam</td><td>3</td><td>×1k</td><td>—</td></tr><tr><td>🟡 Vàng</td><td>4</td><td>×10k</td><td>±5%</td></tr><tr><td>🟢 Xanh lá</td><td>5</td><td>×100k</td><td>±0.5%</td></tr><tr><td>⚪ Trắng</td><td>9</td><td>—</td><td>—</td></tr><tr><td>🥇 Vàng kim</td><td>—</td><td>×0.1</td><td>±5%</td></tr></tbody></table><div class="box box-tip"><div class="box-lbl">📘 Ví dụ: Điện trở 220Ω</div>Đỏ(2) · Đỏ(2) · Nâu(×10) · Vàng kim(±5%) = 2·2·×10 = <strong>220Ω ±5%</strong></div>
+<h3>🔗 Nối tiếp và Song song</h3>
+<div class="card-grid"><div class="card"><div class="card-icon">➡️</div><div class="card-title">Nối tiếp (Series)</div><div class="card-body">Linh kiện nối đuôi nhau. Cùng dòng điện. Điện áp chia đều. <strong>R = R1 + R2</strong>. Dùng với điện trở + LED.</div></div><div class="card"><div class="card-icon">⬆️</div><div class="card-title">Song song (Parallel)</div><div class="card-body">Cùng hai đầu áp. Dòng chia nhánh. Cùng điện áp. Dùng khi mắc nhiều LED cùng lúc.</div></div></div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L11')">← Trước</button><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('L13')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-L13">
+<div class="les-tag">Module 1 · Bài 3</div>
+<div class="les-title">Breadboard & Dụng cụ đo điện</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Hiểu cấu trúc kết nối bên trong breadboard</li><li>Biết dùng đồng hồ vạn năng: đo áp, thông mạch, test LED</li><li>Kết nối mạch LED đầu tiên không cần MCU</li><li>Biết cần mua gì để bắt đầu</li></ul></div>
+<h3>🧱 Breadboard — Bên trong nó nối thế nào?</h3>
+<div class="card-grid"><div class="card"><div class="card-icon">↔️</div><div class="card-title">Dải giữa — nối ngang</div><div class="card-body">5 lỗ cùng hàng ngang (A–B–C–D–E) được nối với nhau. Hàng 1 độc lập với hàng 2. Rãnh giữa ngăn đôi — IC cắm bắc qua rãnh.</div></div><div class="card"><div class="card-icon">↕️</div><div class="card-title">Dải nguồn — nối dọc</div><div class="card-body">Hai dải chạy dọc theo chiều dài: <strong style='color:#ef4444'>Đỏ (+)</strong> và <strong style='color:var(--gr)'>Xanh (−/GND)</strong>. Nối với nhau toàn bộ chiều dài.</div></div></div>
+<h3>🔬 Đồng hồ vạn năng (Multimeter)</h3><div class="step"><div class="step-n">①</div><div class="step-body"><div class="step-title">Đo điện áp DC (V⎓)</div><div class="step-desc">Chọn V⎓. Que đỏ → (+), que đen → GND. Bắt đầu thang cao rồi giảm. Dùng xác nhận nguồn đang sống.</div></div></div><div class="step"><div class="step-n">②</div><div class="step-body"><div class="step-title">Đo điện trở (Ω)</div><div class="step-desc">Chọn Ω. Tắt nguồn mạch. 2 que lên 2 đầu điện trở. Xác nhận giá trị linh kiện.</div></div></div><div class="step"><div class="step-n">③</div><div class="step-body"><div class="step-title">Thông mạch (🔊) — quan trọng nhất!</div><div class="step-desc">Chọn biểu tượng loa. 2 điểm nối với nhau → CÓ TIẾNG BÍP. Dùng tìm đứt dây, breadboard hỏng, kết nối sai.</div></div></div><div class="step"><div class="step-n">④</div><div class="step-body"><div class="step-title">Test LED (Diode mode →|)</div><div class="step-desc">Que đỏ vào Anode (+, chân dài), que đen vào Cathode. LED SÁNG → còn tốt.</div></div></div><div class="box box-warn"><div class="box-lbl">⚠️ Đo dòng điện (A/mA)</div>Phải cắm que đỏ vào lỗ 'A' hoặc 'mA' — không phải lỗ V/Ω. Sai → cháy cầu chì bên trong máy!</div>
+<h3>🛒 Danh sách mua sắm để bắt đầu</h3>
+<div class="comp-grid"><div class="comp"><div class="comp-icon">🟦</div><div><div class="comp-name">Arduino Uno R3</div><div class="comp-det">Board học tốt nhất</div><div class="comp-qty">1 cái · ~120k</div></div></div><div class="comp"><div class="comp-icon">🧱</div><div><div class="comp-name">Breadboard 830 lỗ</div><div class="comp-det">Loại lớn, ổn định</div><div class="comp-qty">1 cái · ~30k</div></div></div><div class="comp"><div class="comp-icon">🌈</div><div><div class="comp-name">Dây jumper M-M</div><div class="comp-det">Set 65 sợi</div><div class="comp-qty">1 set · ~25k</div></div></div><div class="comp"><div class="comp-icon">💡</div><div><div class="comp-name">LED 5mm các màu</div><div class="comp-det">Ít nhất 5 màu</div><div class="comp-qty">10-20 cái · ~15k</div></div></div><div class="comp"><div class="comp-icon">🟫</div><div><div class="comp-name">Điện trở</div><div class="comp-det">220Ω, 1kΩ, 10kΩ</div><div class="comp-qty">10 mỗi loại · ~10k</div></div></div><div class="comp"><div class="comp-icon">🔘</div><div><div class="comp-name">Nút nhấn 4 chân</div><div class="comp-det">Tactile switch</div><div class="comp-qty">5 cái · ~5k</div></div></div><div class="comp"><div class="comp-icon">🌡️</div><div><div class="comp-name">DHT22</div><div class="comp-det">Nhiệt + Độ ẩm</div><div class="comp-qty">1 cái · ~80k</div></div></div><div class="comp"><div class="comp-icon">🔌</div><div><div class="comp-name">Cáp USB-B</div><div class="comp-det">Kết nối Arduino</div><div class="comp-qty">1 cái · ~20k</div></div></div></div><div class="box box-tip"><div class="box-lbl">💡 Mua Starter Kit</div>Tìm 'Arduino Starter Kit' trên Shopee (~250-350k): có sẵn đủ hết để làm tất cả các bài trong khóa này.</div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L12')">← Trước</button><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('L21')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-L21">
+<div class="les-tag">Module 2 · Bài 4</div>
+<div class="les-title">Vi điều khiển (MCU) — Kiến trúc & Chọn board</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Hiểu kiến trúc MCU: CPU, Flash, RAM, GPIO, ADC</li><li>So sánh Arduino Uno và ESP32 để chọn đúng board</li><li>Biết quy trình: viết code → compile → upload → chạy</li><li>Hiểu sự khác biệt với máy tính thông thường</li></ul></div>
+<h3>🤖 MCU là gì?</h3>
+<p>Vi điều khiển (MCU) là máy tính thu nhỏ tích hợp tất cả trên 1 chip: CPU, RAM, Flash, GPIO, ADC... Code của bạn chạy <strong>trực tiếp trên hardware</strong> — không có hệ điều hành trung gian.</p>
+<div class="card-grid"><div class="card"><div class="card-icon">🔧</div><div class="card-title">CPU</div><div class="card-body">Thực hiện lệnh, tính toán. 8-bit 16MHz (Arduino) đến 32-bit dual-core 240MHz (ESP32).</div></div><div class="card"><div class="card-icon">💾</div><div class="card-title">Flash</div><div class="card-body">Lưu chương trình bạn viết. Không mất khi tắt điện. 32KB (Uno) đến 4MB (ESP32).</div></div><div class="card"><div class="card-icon">🗂️</div><div class="card-title">RAM</div><div class="card-body">Lưu biến khi chạy. Mất khi tắt điện. 2KB (Uno) đến 520KB (ESP32).</div></div><div class="card"><div class="card-icon">📡</div><div class="card-title">GPIO</div><div class="card-body">Chân vào/ra kết nối với thế giới. Xuất 5V/0V, đọc nút nhấn, ADC, PWM, I2C, SPI...</div></div></div><table class="tbl"><thead><tr><th>Thông số</th><th>Arduino Uno</th><th>ESP32 DevKit</th></tr></thead><tbody><tr><td>CPU</td><td>ATmega328P 8-bit 16MHz</td><td>Xtensa 32-bit Dual 240MHz</td></tr><tr><td>RAM</td><td>2 KB</td><td>520 KB</td></tr><tr><td>Flash</td><td>32 KB</td><td>4 MB</td></tr><tr><td>GPIO</td><td>14 digital + 6 analog</td><td>34 GPIO đa năng</td></tr><tr><td>WiFi</td><td>❌ Không</td><td>✅ Tích hợp</td></tr><tr><td>Bluetooth</td><td>❌</td><td>✅ BT 4.2 + BLE</td></tr><tr><td>Điện áp GPIO</td><td>5V logic</td><td>3.3V logic</td></tr><tr><td>Giá</td><td>~120k VND</td><td>~80k VND</td></tr></tbody></table><div class="box box-tip"><div class="box-lbl">🎯 Nên bắt đầu với cái nào?</div><strong>Người mới:</strong> Arduino Uno — đơn giản, cộng đồng lớn, tài liệu tiếng Việt nhiều.<br><strong>Muốn IoT ngay:</strong> ESP32 — rẻ hơn, mạnh hơn, WiFi sẵn.<br><strong>Biết Python:</strong> Raspberry Pi Pico + MicroPython.</div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L13')">← Trước</button><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('L22')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-L22">
+<div class="les-tag">Module 2 · Bài 5</div>
+<div class="les-title">Cài Arduino IDE & Chương trình đầu tiên</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Cài Arduino IDE 2.x và kết nối board</li><li>Chọn đúng board và cổng COM</li><li>Viết và nạp Hello World thành công</li><li>Dùng Serial Monitor để xem output</li></ul></div>
+<h3>🛠️ Cài đặt từng bước</h3><div class="step"><div class="step-n">1</div><div class="step-body"><div class="step-title">Tải Arduino IDE 2.x</div><div class="step-desc">Vào <strong>arduino.cc/en/software</strong> → Download cho Windows/Mac/Linux. Cài như phần mềm thông thường.</div></div></div><div class="step"><div class="step-n">2</div><div class="step-body"><div class="step-title">Chọn Board</div><div class="step-desc">Tools → Board → Arduino AVR Boards → <strong>Arduino Uno</strong>. (ESP32: cần cài thêm board package trước)</div></div></div><div class="step"><div class="step-n">3</div><div class="step-body"><div class="step-title">Chọn Port</div><div class="step-desc">Cắm USB. Tools → Port → <strong>COMx</strong> (Windows) hoặc /dev/cu.usbmodem... (Mac). Không thấy → cài driver CH340.</div></div></div><div class="step"><div class="step-n">4</div><div class="step-body"><div class="step-title">[ESP32] Cài board package</div><div class="step-desc">File → Preferences → Additional Boards Manager URLs → dán:<br><code>https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json</code><br>→ Tools → Board Manager → tìm 'esp32' → Install</div></div></div>
+<h3>💻 Cấu trúc chương trình Arduino</h3><div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><span <span class="ck">class</span>="cc">// Mọi chương trình Arduino gồm <span class="cn">2</span> hàm bắt buộc</span>
+
+<span class="ck">void</span> <span class="cf">setup</span>() {
+  <span <span class="ck">class</span>="cc">// Chạy MỘT LẦN khi khởi động</span>
+  <span <span class="ck">class</span>="cc">// Dùng để: mở <span class="cf">Serial</span>, cấu hình chân, khởi tạo module...</span>
+  <span class="cf">Serial</span>.<span class="cf">begin</span>(<span class="cn">9600</span>);         <span <span class="ck">class</span>="cc">// Mở <span class="cf">Serial</span> tốc độ <span class="cn">9600</span> baud</span>
+  <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cs">&quot;Khởi động xong!&quot;</span>);
+}
+
+<span class="ck">void</span> <span class="cf">loop</span>() {
+  <span <span class="ck">class</span>="cc">// Chạy LẶP VÔ HẠN sau <span class="cf">setup</span>()</span>
+  <span <span class="ck">class</span>="cc">// Logic chính của chương trình nằm ở đây</span>
+  <span class="cf">Serial</span>.<span class="cf">print</span>(<span class="cs">&quot;Thời gian: &quot;</span>);
+  <span class="cf">Serial</span>.<span class="cf">print</span>(<span class="cf">millis</span>());     <span <span class="ck">class</span>="cc">// ms kể từ khi bật nguồn</span>
+  <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cs">&quot; ms&quot;</span>);
+  <span class="cf">delay</span>(<span class="cn">1000</span>);                <span <span class="ck">class</span>="cc">// Chờ <span class="cn">1</span> giây rồi lặp lại</span>
+}</pre>
+</div><div class="box box-info"><div class="box-lbl">📺 Dùng Serial Monitor</div>Sau khi Upload: Tools → Serial Monitor (Ctrl+Shift+M). Chọn baud rate 9600. Sẽ thấy dữ liệu từ println() theo thời gian thực.</div>
+<h3>🔴 Lỗi thường gặp</h3><div class="box box-err"><div class="box-lbl"></div><strong>Port not found / không thấy COM:</strong> Thử cáp USB khác (có loại chỉ sạc). Cài driver CH340.<br><strong>avrdude: stk500_getsync() failed:</strong> Sai board hoặc sai port trong Tools menu.<br><strong>Serial Monitor hiện ký tự lạ:</strong> Sai baud rate — phải khớp với Serial.begin().</div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L21')">← Trước</button><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('L31')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-L31">
+<div class="les-tag">Module 3 · Thực hành</div>
+<div class="les-title">Bài 1: LED Blink — Dự án đầu tiên</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Kết nối LED + điện trở vào Arduino trên breadboard</li><li>Hiểu hàm pinMode(), digitalWrite(), delay()</li><li>Nạp và chạy code thành công</li><li>Thử nhiều pattern nhấp nháy khác nhau</li></ul></div>
+<h3>🛒 Linh kiện</h3>
+<div class="comp-grid"><div class="comp"><div class="comp-icon">🟦</div><div><div class="comp-name">Arduino Uno</div><div class="comp-det">+ Cáp USB</div><div class="comp-qty">1 cái</div></div></div><div class="comp"><div class="comp-icon">🧱</div><div><div class="comp-name">Breadboard</div><div class="comp-det">Bất kỳ</div><div class="comp-qty">1 cái</div></div></div><div class="comp"><div class="comp-icon">💡</div><div><div class="comp-name">LED 5mm</div><div class="comp-det">Màu bất kỳ</div><div class="comp-qty">1 cái</div></div></div><div class="comp"><div class="comp-icon">🟫</div><div><div class="comp-name">Điện trở 220Ω</div><div class="comp-det">Đỏ-Đỏ-Nâu</div><div class="comp-qty">1 cái</div></div></div><div class="comp"><div class="comp-icon">🌈</div><div><div class="comp-name">Dây jumper M-M</div><div class="comp-det">2 sợi</div><div class="comp-qty">2 sợi</div></div></div></div>
+<h3>🔌 Sơ đồ kết nối</h3>
+<div class="svg-wrap">
+<svg viewBox="0 0 580 200" width="100%">
+  <rect x="20" y="40" width="150" height="120" rx="8" fill="#1a2535" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="95" y="64" fill="#60a5fa" font-size="11" font-weight="700" text-anchor="middle" font-family="system-ui">ARDUINO UNO</text>
+  <rect x="135" y="80" width="14" height="10" rx="2" fill="#374151"/>
+  <text x="130" y="88" fill="#22d3a4" font-size="9" text-anchor="end" font-family="monospace">GND</text>
+  <rect x="135" y="118" width="14" height="10" rx="2" fill="#374151"/>
+  <text x="130" y="126" fill="#fbbf24" font-size="9" text-anchor="end" font-family="monospace">D13</text>
+  <line x1="149" y1="123" x2="250" y2="123" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="5 2"/>
+  <rect x="250" y="115" width="50" height="16" rx="3" fill="#2d1a00" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="275" y="127" fill="#fbbf24" font-size="9" text-anchor="middle" font-family="monospace">220Ω</text>
+  <line x1="300" y1="123" x2="345" y2="123" stroke="#22d3a4" stroke-width="1.5" stroke-dasharray="5 2"/>
+  <polygon points="350,113 370,113 360,130" fill="#22d3a4" stroke="#10b981" stroke-width="1.5"/>
+  <line x1="360" y1="130" x2="360" y2="145" stroke="#22d3a4" stroke-width="2"/>
+  <line x1="350" y1="113" x2="370" y2="113" stroke="#22d3a4" stroke-width="1.5"/>
+  <line x1="345" y1="123" x2="350" y2="113" stroke="#22d3a4" stroke-width="1"/>
+  <line x1="360" y1="145" x2="360" y2="162" stroke="#1a3a1a" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <line x1="360" y1="162" x2="149" y2="162" stroke="#1a3a1a" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <line x1="149" y1="162" x2="149" y2="85" stroke="#1a3a1a" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="378" y="119" fill="#22d3a4" font-size="10" font-family="system-ui">(+) Chân dài</text>
+  <text x="378" y="148" fill="#8499bb" font-size="10" font-family="system-ui">(−) Chân ngắn → GND</text>
+  <text x="275" y="143" fill="#fbbf24" font-size="9" text-anchor="middle" font-family="system-ui">Điện trở 220Ω</text>
+  <line x1="378" y1="110" x2="390" y2="102" stroke="#fbbf24" stroke-width="1" opacity="0.5"/>
+  <line x1="380" y1="119" x2="393" y2="113" stroke="#fbbf24" stroke-width="1" opacity="0.4"/>
+  <text x="290" y="188" fill="#4a6070" font-size="10" text-anchor="middle" font-family="system-ui">D13 → 220Ω → LED(+) → LED(−) → GND</text>
+</svg>
+</div><div class="box box-info"><div class="box-lbl">📋 Mẹo: không cần kết nối gì</div>Arduino Uno có <strong>LED tích hợp sẵn ở chân 13</strong>. Upload code rồi xem LED tích hợp trên board trước, sau đó mới gắn LED ngoài.</div>
+<h3>💻 Code — Giải thích từng dòng</h3><div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><span class="ck">const</span> <span class="ck">int</span> LED_PIN = <span class="cn">13</span>;  <span <span class="ck">class</span>="cc">// Tên cho chân <span class="cn">13</span> (dễ thay đổi sau)</span>
+
+<span class="ck">void</span> <span class="cf">setup</span>() {
+  <span class="cf">Serial</span>.<span class="cf">begin</span>(<span class="cn">9600</span>);
+  <span class="cf">pinMode</span>(LED_PIN, <span class="cf">OUTPUT</span>);  <span <span class="ck">class</span>="cc">// <span class="cf">OUTPUT</span> = MCU xuất điện áp</span>
+                              <span <span class="ck">class</span>="cc">// <span class="cf">INPUT</span>  = MCU đọc điện áp từ ngoài</span>
+  <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cs">&quot;LED sẵn sàng!&quot;</span>);
+}
+
+<span class="ck">void</span> <span class="cf">loop</span>() {
+  <span class="cf">digitalWrite</span>(LED_PIN, <span class="cf">HIGH</span>);  <span <span class="ck">class</span>="cc">// <span class="cf">HIGH</span> = 5V → có dòng → LED sáng</span>
+  <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cs">&quot;LED: BẬT&quot;</span>);
+  <span class="cf">delay</span>(<span class="cn">1000</span>);                  <span <span class="ck">class</span>="cc">// Chờ 1000ms = <span class="cn">1</span> giây</span>
+
+  <span class="cf">digitalWrite</span>(LED_PIN, <span class="cf">LOW</span>);   <span <span class="ck">class</span>="cc">// <span class="cf">LOW</span> = 0V → không có dòng → tắt</span>
+  <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cs">&quot;LED: TẮT&quot;</span>);
+  <span class="cf">delay</span>(<span class="cn">1000</span>);
+  <span <span class="ck">class</span>="cc">// Vòng lặp: BẬT → chờ → TẮT → chờ → BẬT → ... (mãi mãi)</span>
+}</pre>
+</div>
+<h3>🔬 LED Simulator — Thử tương tác</h3>
+<div class="sim">
+  <div class="sim-title">Thử nghiệm chế độ nhấp nháy</div>
+  <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:7px">
+      <div class="led-dot" id="led1"></div>
+      <div style="font-size:10px;color:var(--hi);font-family:monospace">PIN 13</div>
+      <div style="font-size:12px;font-weight:600;color:var(--re)" id="led1-state">LOW</div>
+    </div>
+    <div style="flex:1;min-width:180px">
+      <div style="margin-bottom:10px">
+        <button class="sim-btn active" id="btn-stop" onclick="ledMode('stop')">⏹ Tắt</button>
+        <button class="sim-btn" id="btn-slow" onclick="ledMode('slow')">🐢 Chậm 2s</button>
+        <button class="sim-btn" id="btn-norm" onclick="ledMode('norm')">▶ 1s</button>
+        <button class="sim-btn" id="btn-fast" onclick="ledMode('fast')">⚡ 200ms</button>
+        <button class="sim-btn" id="btn-sos" onclick="ledMode('sos')">🆘 SOS</button>
+      </div>
+      <div style="font-family:monospace;font-size:12px;color:var(--hi);background:var(--bg4);padding:7px 10px;border-radius:6px" id="led-code-display">// LED dừng</div>
+    </div>
+  </div>
+</div><div class="box box-warn"><div class="box-lbl">✏️ Bài tập</div>1. Đổi delay() để LED nhấp nháy 5 lần/giây (delay 100ms)<br>2. Sáng 200ms tắt 800ms (không đều nhau)<br>3. Thêm LED thứ 2 ở D12 — 2 LED nhấp nháy xen kẽ<br><strong>Thử thách:</strong> Tạo tín hiệu SOS (···---···) bằng delay</div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L22')">← Trước</button><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('L32')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-L32">
+<div class="les-tag">Module 3 · Dự án nhỏ</div>
+<div class="les-title">Bài 2: Đèn giao thông (3 LED + Hàm)</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Kết nối và điều khiển 3 LED cùng lúc</li><li>Học cách tổ chức code bằng hàm (function)</li><li>Hiểu tại sao hàm giúp code dễ đọc và bảo trì</li><li>Hoàn thành dự án đèn giao thông hoạt động thực tế</li></ul></div>
+<div class="comp-grid"><div class="comp"><div class="comp-icon">🔴</div><div><div class="comp-name">LED đỏ</div><div class="comp-det">Nối chân D4</div><div class="comp-qty">1 cái</div></div></div><div class="comp"><div class="comp-icon">🟡</div><div><div class="comp-name">LED vàng</div><div class="comp-det">Nối chân D3</div><div class="comp-qty">1 cái</div></div></div><div class="comp"><div class="comp-icon">🟢</div><div><div class="comp-name">LED xanh</div><div class="comp-det">Nối chân D2</div><div class="comp-qty">1 cái</div></div></div><div class="comp"><div class="comp-icon">🟫</div><div><div class="comp-name">Điện trở 220Ω</div><div class="comp-det">Mỗi LED 1 cái</div><div class="comp-qty">3 cái</div></div></div></div><div class="box box-info"><div class="box-lbl">💡 Tại sao dùng hàm?</div>Thay vì viết <code>digitalWrite(4,HIGH); delay(4000);</code> lặp lại → đặt vào hàm <code>denDo(4000)</code>. Muốn sửa logic đèn đỏ → chỉ sửa một chỗ.</div><div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><span <span class="ck">class</span>="cc">// === ĐÈN GIAO THÔNG ===</span>
+<span class="ck">const</span> <span class="ck">int</span> DEN_DO   = <span class="cn">4</span>;
+<span class="ck">const</span> <span class="ck">int</span> DEN_VANG = <span class="cn">3</span>;
+<span class="ck">const</span> <span class="ck">int</span> DEN_XANH = <span class="cn">2</span>;
+
+<span class="ck">void</span> tatHet() {          <span <span class="ck">class</span>="cc">// Hàm tắt tất cả</span>
+  <span class="cf">digitalWrite</span>(DEN_DO,   <span class="cf">LOW</span>);
+  <span class="cf">digitalWrite</span>(DEN_VANG, <span class="cf">LOW</span>);
+  <span class="cf">digitalWrite</span>(DEN_XANH, <span class="cf">LOW</span>);
+}
+
+<span class="ck">void</span> denDo(<span class="ck">int</span> ms) {     <span <span class="ck">class</span>="cc">// Bật đèn đỏ trong ms mili giây</span>
+  tatHet();
+  <span class="cf">digitalWrite</span>(DEN_DO, <span class="cf">HIGH</span>);
+  <span class="cf">delay</span>(ms);
+}
+
+<span class="ck">void</span> denVang(<span class="ck">int</span> ms) { tatHet(); <span class="cf">digitalWrite</span>(DEN_VANG, <span class="cf">HIGH</span>); <span class="cf">delay</span>(ms); }
+<span class="ck">void</span> denXanh(<span class="ck">int</span> ms) { tatHet(); <span class="cf">digitalWrite</span>(DEN_XANH, <span class="cf">HIGH</span>); <span class="cf">delay</span>(ms); }
+
+<span class="ck">void</span> <span class="cf">setup</span>() {
+  <span class="cf">pinMode</span>(DEN_DO, <span class="cf">OUTPUT</span>); <span class="cf">pinMode</span>(DEN_VANG, <span class="cf">OUTPUT</span>); <span class="cf">pinMode</span>(DEN_XANH, <span class="cf">OUTPUT</span>);
+}
+
+<span class="ck">void</span> <span class="cf">loop</span>() {
+  denDo(<span class="cn">4000</span>);     <span <span class="ck">class</span>="cc">// 🔴 Đỏ <span class="cn">4</span> giây</span>
+  denVang(<span class="cn">1500</span>);   <span <span class="ck">class</span>="cc">// 🟡 Vàng <span class="cn">1.5</span> giây</span>
+  denXanh(<span class="cn">3000</span>);   <span <span class="ck">class</span>="cc">// 🟢 Xanh <span class="cn">3</span> giây</span>
+  denVang(<span class="cn">1500</span>);   <span <span class="ck">class</span>="cc">// 🟡 Vàng <span class="cn">1.5</span> giây</span>
+}</pre>
+</div>
+<h3>🚦 Mô phỏng đèn giao thông</h3>
+<div class="sim">
+  <div class="sim-title">Chu kỳ đèn giao thông thực tế</div>
+  <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+    <div style="background:#0d1521;border-radius:10px;padding:14px 18px;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:80px">
+      <div class="led-dot" id="tl-red"></div>
+      <div class="led-dot" id="tl-amber"></div>
+      <div class="led-dot" id="tl-green"></div>
+      <div style="font-size:11px;font-weight:700;text-align:center;margin-top:4px" id="tl-label" style="color:var(--mu)">Dừng</div>
+    </div>
+    <div style="flex:1">
+      <div style="margin-bottom:10px">
+        <button class="sim-btn" id="tl-start-btn" onclick="startTL()">▶ Chạy</button>
+        <button class="sim-btn" onclick="stopTL()">⏹ Dừng</button>
+      </div>
+      <div style="font-size:12px;color:var(--mu);line-height:1.9">
+        <div>🔴 Đỏ: <strong>4000ms</strong> — dừng lại</div>
+        <div>🟡 Vàng: <strong>1500ms</strong> — chuẩn bị</div>
+        <div>🟢 Xanh: <strong>3000ms</strong> — đi</div>
+        <div>🟡 Vàng: <strong>1500ms</strong> — sắp đỏ</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L31')">← Trước</button><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('L33')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-L33">
+<div class="les-tag">Module 3 · Kỹ thuật</div>
+<div class="les-title">Bài 3: PWM — Điều chỉnh mờ sáng LED</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Hiểu PWM tạo điện áp giả analog thế nào</li><li>Dùng analogWrite(pin, 0-255) điều chỉnh độ sáng</li><li>Xác định chân ~ hỗ trợ PWM trên Arduino</li><li>Tạo hiệu ứng fade in/out mượt mà</li></ul></div>
+<h3>📖 PWM là gì?</h3>
+<p>MCU chỉ xuất HIGH (5V) hoặc LOW (0V). PWM <strong>bật/tắt rất nhanh</strong> với tỉ lệ khác nhau để tạo ra hiệu ứng điện áp trung gian:</p><div class="box box-info"><div class="box-lbl">🔑 Duty Cycle</div>Tỉ lệ thời gian bật trong một chu kỳ:<br>0% = tắt hoàn toàn · 50% = nửa sáng · 100% = sáng nhất<br><code>analogWrite(pin, 0-255)</code>: 0=0%, 128≈50%, 255=100%<br><br>Chỉ chân có dấu <strong>~</strong> mới hỗ trợ: <strong>~3, ~5, ~6, ~9, ~10, ~11</strong> (Arduino Uno)</div>
+<h3>🎛️ PWM Demo tương tác</h3>
+<div class="sim">
+  <div class="sim-title">analogWrite() — Kéo thanh trượt</div>
+  <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+    <div class="led-dot" id="pwm-led" style="flex-shrink:0"></div>
+    <div style="flex:1">
+      <div class="range-row"><label>analogWrite()</label><input type="range" min="0" max="255" value="128" oninput="updatePWM(this.value)"><span id="pwm-val">128</span></div>
+      <div id="pwm-chips">
+        <span class="val-chip"><span class="lbl">Duty cycle:</span><span class="val" id="pwm-duty">50%</span></span>
+        <span class="val-chip"><span class="lbl">~Điện áp:</span><span class="val" id="pwm-volt">2.5V</span></span>
+        <span class="val-chip"><span class="lbl">Độ sáng:</span><span class="val" id="pwm-bright">Trung bình</span></span>
+      </div>
+    </div>
+  </div>
+</div><div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><span class="ck">const</span> <span class="ck">int</span> LED_PWM = <span class="cn">9</span>;  <span <span class="ck">class</span>="cc">// Chân ~<span class="cn">9</span> (có dấu ~ = hỗ trợ PWM)</span>
+
+<span class="ck">void</span> <span class="cf">setup</span>() { <span class="cf">pinMode</span>(LED_PWM, <span class="cf">OUTPUT</span>); }
+
+<span class="ck">void</span> <span class="cf">loop</span>() {
+  <span <span class="ck">class</span>="cc">// Fade IN: từ tối → sáng dần</span>
+  <span class="ck">for</span> (<span class="ck">int</span> i = <span class="cn">0</span>; i &lt;= <span class="cn">255</span>; i++) {
+    <span class="cf">analogWrite</span>(LED_PWM, i);   <span <span class="ck">class</span>="cc">// <span class="cn">0</span> = tắt, <span class="cn">255</span> = sáng nhất</span>
+    <span class="cf">delay</span>(<span class="cn">8</span>);                  <span <span class="ck">class</span>="cc">// <span class="cn">256</span> bước × 8ms ≈ <span class="cn">2</span> giây</span>
+  }
+  <span <span class="ck">class</span>="cc">// Fade OUT: từ sáng → tối dần</span>
+  <span class="ck">for</span> (<span class="ck">int</span> i = <span class="cn">255</span>; i &gt;= <span class="cn">0</span>; i--) {
+    <span class="cf">analogWrite</span>(LED_PWM, i);
+    <span class="cf">delay</span>(<span class="cn">8</span>);
+  }
+}</pre>
+</div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L32')">← Trước</button><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('L41')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-L41">
+<div class="les-tag">Module 4 · Input</div>
+<div class="les-title">Bài 4: Đọc nút nhấn & Pull-up Resistor</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Hiểu vấn đề 'chân trôi nổi' (floating pin)</li><li>Dùng INPUT_PULLUP để đọc nút nhấn đúng</li><li>Kết nối nút nhấn 4 chân trên breadboard</li><li>Lập trình đèn bật khi nhấn, tắt khi thả</li></ul></div>
+<h3>🤔 Vấn đề: Chân GPIO "trôi nổi"</h3>
+<p>Khi nút chưa nhấn, chân GPIO không nối với gì → điện áp không xác định, dao động ngẫu nhiên → <code>digitalRead()</code> trả về kết quả ngẫu nhiên!</p>
+<div class="card-grid"><div class="card"><div class="card-icon">🔴</div><div class="card-title">Pull-DOWN (kéo về GND)</div><div class="card-body">Điện trở 10kΩ từ chân về GND. Nút hở → LOW. Nhấn → nối 5V → đọc HIGH. Cần thêm điện trở ngoài.</div></div><div class="card"><div class="card-icon">🟢</div><div class="card-title">Pull-UP nội (Khuyên dùng!)</div><div class="card-body"><code>INPUT_PULLUP</code> → Arduino bật điện trở 20kΩ nội. Nút hở → HIGH. Nhấn → nối GND → đọc <strong>LOW</strong>. Không cần điện trở ngoài!</div></div></div><div class="box box-tip"><div class="box-lbl">💡 Logic ngược quan trọng!</div>Với INPUT_PULLUP: <strong>nhấn = đọc LOW, thả = đọc HIGH</strong>. Ngược trực giác nhưng hoàn toàn bình thường. Nhớ dùng <code>if(state == LOW)</code> khi nhấn.</div><div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><span class="ck">const</span> <span class="ck">int</span> NUT_PIN = <span class="cn">2</span>;   <span <span class="ck">class</span>="cc">// Nút nhấn ở chân D2</span>
+<span class="ck">const</span> <span class="ck">int</span> LED_PIN = <span class="cn">13</span>;  <span <span class="ck">class</span>="cc">// LED ở chân D13</span>
+
+<span class="ck">void</span> <span class="cf">setup</span>() {
+  <span class="cf">Serial</span>.<span class="cf">begin</span>(<span class="cn">9600</span>);
+  <span <span class="ck">class</span>="cc">// <span class="cf">INPUT_PULLUP</span> = bật điện trở 20kΩ nội bộ</span>
+  <span <span class="ck">class</span>="cc">// Nút nhấn nối từ chân D2 về GND (không cần điện trở ngoài!)</span>
+  <span class="cf">pinMode</span>(NUT_PIN, <span class="cf">INPUT_PULLUP</span>);
+  <span class="cf">pinMode</span>(LED_PIN, <span class="cf">OUTPUT</span>);
+}
+
+<span class="ck">void</span> <span class="cf">loop</span>() {
+  <span class="ck">int</span> state = <span class="cf">digitalRead</span>(NUT_PIN);
+  <span <span class="ck">class</span>="cc">// <span class="cf">HIGH</span> = nút chưa nhấn (pull-up giữ 5V)</span>
+  <span <span class="ck">class</span>="cc">// <span class="cf">LOW</span>  = nút đang nhấn (nối xuống GND)</span>
+
+  <span class="ck">if</span> (state == <span class="cf">LOW</span>) {          <span <span class="ck">class</span>="cc">// Nhấn → <span class="cf">LOW</span></span>
+    <span class="cf">digitalWrite</span>(LED_PIN, <span class="cf">HIGH</span>); <span <span class="ck">class</span>="cc">// Bật đèn</span>
+    <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cs">&quot;Nhấn!&quot;</span>);
+  } <span class="ck">else</span> {
+    <span class="cf">digitalWrite</span>(LED_PIN, <span class="cf">LOW</span>);  <span <span class="ck">class</span>="cc">// Thả → Tắt đèn</span>
+  }
+  <span class="cf">delay</span>(<span class="cn">10</span>);
+}</pre>
+</div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L33')">← Trước</button><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('L42')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-L42">
+<div class="les-tag">Module 4 · Kỹ thuật</div>
+<div class="les-title">Bài 5: Toggle LED & Chống rung (Debounce)</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Hiểu hiện tượng 'nảy tiếp điểm' (contact bounce)</li><li>Xử lý debounce bằng phát hiện sườn xuống</li><li>Dùng biến bool để toggle trạng thái LED</li><li>Biết khi nào nên dùng millis() thay delay()</li></ul></div><div class="box box-warn"><div class="box-lbl">⚠️ Triệu chứng Bounce</div>Nhấn nút 1 lần nhưng LED bật-tắt-bật-tắt nhiều lần liên tiếp → Không phải lỗi logic! Đây là do tiếp điểm vật lý nảy 5-20ms khi đóng.</div><div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><span class="ck">const</span> <span class="ck">int</span> NUT_PIN  = <span class="cn">2</span>;
+<span class="ck">const</span> <span class="ck">int</span> LED_PIN  = <span class="cn">13</span>;
+<span class="ck">const</span> <span class="ck">int</span> DEBOUNCE = <span class="cn">50</span>;    <span <span class="ck">class</span>="cc">// Chờ 50ms cho tiếp điểm ổn định</span>
+
+<span class="ck">bool</span> ledState = <span class="ck">false</span>;      <span <span class="ck">class</span>="cc">// Trạng thái LED hiện tại</span>
+<span class="ck">bool</span> nutTruoc = <span class="cf">HIGH</span>;       <span <span class="ck">class</span>="cc">// Trạng thái nút lần trước</span>
+
+<span class="ck">void</span> <span class="cf">setup</span>() {
+  <span class="cf">Serial</span>.<span class="cf">begin</span>(<span class="cn">9600</span>);
+  <span class="cf">pinMode</span>(NUT_PIN, <span class="cf">INPUT_PULLUP</span>);
+  <span class="cf">pinMode</span>(LED_PIN, <span class="cf">OUTPUT</span>);
+}
+
+<span class="ck">void</span> <span class="cf">loop</span>() {
+  <span class="ck">bool</span> nutHienTai = <span class="cf">digitalRead</span>(NUT_PIN);
+
+  <span <span class="ck">class</span>="cc">// Phát hiện SƯỜN XUỐNG: <span class="cf">HIGH</span> → <span class="cf">LOW</span> (ngón tay vừa chạm nút)</span>
+  <span class="ck">if</span> (nutHienTai == <span class="cf">LOW</span> &amp;&amp; nutTruoc == <span class="cf">HIGH</span>) {
+    <span class="cf">delay</span>(DEBOUNCE);  <span <span class="ck">class</span>="cc">// Chờ tiếp điểm ổn định</span>
+
+    <span class="ck">if</span> (<span class="cf">digitalRead</span>(NUT_PIN) == <span class="cf">LOW</span>) {  <span <span class="ck">class</span>="cc">// Vẫn nhấn → nhấn thật</span>
+      ledState = !ledState;             <span <span class="ck">class</span>="cc">// Toggle: đảo trạng thái</span>
+      <span class="cf">digitalWrite</span>(LED_PIN, ledState);
+      <span class="cf">Serial</span>.<span class="cf">print</span>(<span class="cs">&quot;LED → &quot;</span>);
+      <span class="cf">Serial</span>.<span class="cf">println</span>(ledState ? <span class="cs">&quot;BẬT&quot;</span> : <span class="cs">&quot;TẮT&quot;</span>);
+    }
+  }
+
+  nutTruoc = nutHienTai;  <span <span class="ck">class</span>="cc">// Lưu lại cho lần sau</span>
+}</pre>
+</div><div class="box box-info"><div class="box-lbl">🔑 millis() vs delay()</div><code>delay(50)</code> → chặn MCU 50ms, không làm gì khác được.<br><code>millis()</code> → trả về ms từ khi bật, không chặn. Dùng khi cần xử lý nhiều việc cùng lúc:<br><code>if(millis()-lastTime &gt;= interval) { lastTime=millis(); /* việc cần làm */ }</code></div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L41')">← Trước</button><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('L51')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-L51">
+<div class="les-tag">Module 5 · Cảm biến</div>
+<div class="les-title">Bài 6: Biến trở & ADC — Tín hiệu Analog</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Hiểu ADC chuyển điện áp thành số 0-1023</li><li>Đọc biến trở bằng analogRead()</li><li>Dùng hàm map() chuyển đổi phạm vi giá trị</li><li>Điều chỉnh độ sáng LED theo vị trí biến trở</li></ul></div>
+<h3>📖 ADC — Analog to Digital Converter</h3>
+<div style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:14px;margin:10px 0;text-align:center">
+  <div style="font-size:18px;font-weight:700;color:var(--tx);font-family:monospace">analogRead() → 0 đến 1023</div>
+  <div style="font-size:12px;color:var(--mu);margin-top:6px">Arduino Uno: ADC 10-bit → 2¹⁰ = 1024 bước<br>0V → 0 &nbsp;·&nbsp; 2.5V → 511 &nbsp;·&nbsp; 5V → 1023<br>Điện áp thực = analogRead() × 5.0 / 1023</div>
+</div><div class="box box-info"><div class="box-lbl">📌 Chân Analog</div>Arduino Uno có 6 chân analog đặc biệt: <strong>A0 đến A5</strong>. Không cần pinMode() cho analog input — dùng <code>analogRead(A0)</code> thẳng luôn.</div>
+<h3>🎛️ ADC Demo tương tác</h3>
+<div class="sim">
+  <div class="sim-title">Mô phỏng analogRead() — Biến trở</div>
+  <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+    <div class="led-dot" id="adc-led" style="flex-shrink:0"></div>
+    <div style="flex:1">
+      <div class="range-row"><label>Biến trở</label><input type="range" min="0" max="1023" value="512" oninput="updateADC(this.value)"><span id="adc-pot">512</span></div>
+      <div>
+        <span class="val-chip"><span class="lbl">analogRead():</span><span class="val" id="adc-raw">512</span></span>
+        <span class="val-chip"><span class="lbl">Điện áp:</span><span class="val" id="adc-volt">2.50V</span></span>
+        <span class="val-chip"><span class="lbl">→ analogWrite():</span><span class="val" id="adc-pwm">128</span></span>
+        <span class="val-chip"><span class="lbl">% Đầy:</span><span class="val" id="adc-pct">50%</span></span>
+      </div>
+    </div>
+  </div>
+</div><div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><span <span class="ck">class</span>="cc">// Biến trở: A0 (chân giữa) | LED PWM: chân <span class="cn">9</span></span>
+<span class="ck">void</span> <span class="cf">setup</span>() {
+  <span class="cf">Serial</span>.<span class="cf">begin</span>(<span class="cn">9600</span>);
+  <span class="cf">pinMode</span>(<span class="cn">9</span>, <span class="cf">OUTPUT</span>);  <span <span class="ck">class</span>="cc">// LED ở chân ~<span class="cn">9</span></span>
+}
+
+<span class="ck">void</span> <span class="cf">loop</span>() {
+  <span class="ck">int</span> pot = <span class="cf">analogRead</span>(A0);          <span <span class="ck">class</span>="cc">// Đọc biến trở: <span class="cn">0</span>-<span class="cn">1023</span></span>
+
+  <span <span class="ck">class</span>="cc">// <span class="cf">map</span>(value, fromLow, fromHigh, toLow, toHigh)</span>
+  <span class="ck">int</span> bright = <span class="cf">map</span>(pot, <span class="cn">0</span>, <span class="cn">1023</span>, <span class="cn">0</span>, <span class="cn">255</span>);  <span <span class="ck">class</span>="cc">// Chuyển <span class="cn">0</span>-<span class="cn">1023</span> → <span class="cn">0</span>-<span class="cn">255</span></span>
+
+  <span class="cf">analogWrite</span>(<span class="cn">9</span>, bright);            <span <span class="ck">class</span>="cc">// Điều chỉnh độ sáng LED</span>
+
+  <span class="ck">float</span> voltage = pot * <span class="cn">5.0</span> / <span class="cn">1023.0</span>;
+  <span class="cf">Serial</span>.<span class="cf">print</span>(<span class="cs">&quot;ADC:&quot;</span>); <span class="cf">Serial</span>.<span class="cf">print</span>(pot);
+  <span class="cf">Serial</span>.<span class="cf">print</span>(<span class="cs">&quot;  Volt:&quot;</span>); <span class="cf">Serial</span>.<span class="cf">print</span>(voltage, <span class="cn">2</span>);
+  <span class="cf">Serial</span>.<span class="cf">print</span>(<span class="cs">&quot;V  PWM:&quot;</span>); <span class="cf">Serial</span>.<span class="cf">println</span>(bright);
+  <span class="cf">delay</span>(<span class="cn">100</span>);
+}</pre>
+</div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L42')">← Trước</button><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('L52')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-L52">
+<div class="les-tag">Module 5 · Cảm biến</div>
+<div class="les-title">Bài 7: Cảm biến ánh sáng LDR</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Hiểu LDR thay đổi điện trở theo ánh sáng</li><li>Lắp mạch chia áp đọc LDR bằng ADC</li><li>Lập trình tự động bật LED khi tối</li><li>Biết cách hiệu chỉnh ngưỡng</li></ul></div><div class="box box-info"><div class="box-lbl">💡 LDR — Light Dependent Resistor</div>LDR là điện trở thay đổi theo ánh sáng:<br><strong>Sáng:</strong> điện trở nhỏ (~1kΩ) → điện áp A0 thấp<br><strong>Tối:</strong> điện trở lớn (~100kΩ) → điện áp A0 cao<br><br>Kết nối: 5V → LDR → A0 → 10kΩ → GND (mạch chia áp)</div><div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><span class="ck">const</span> <span class="ck">int</span> LDR_PIN = A0;
+<span class="ck">const</span> <span class="ck">int</span> LED_PIN = <span class="cn">13</span>;
+<span class="ck">const</span> <span class="ck">int</span> NGUONG  = <span class="cn">500</span>;   <span <span class="ck">class</span>="cc">// Điều chỉnh theo môi trường thực!</span>
+
+<span class="ck">void</span> <span class="cf">setup</span>() {
+  <span class="cf">Serial</span>.<span class="cf">begin</span>(<span class="cn">9600</span>);
+  <span class="cf">pinMode</span>(LED_PIN, <span class="cf">OUTPUT</span>);
+}
+
+<span class="ck">void</span> <span class="cf">loop</span>() {
+  <span class="ck">int</span> ldr = <span class="cf">analogRead</span>(LDR_PIN);
+  <span class="cf">Serial</span>.<span class="cf">print</span>(<span class="cs">&quot;LDR = &quot;</span>); <span class="cf">Serial</span>.<span class="cf">print</span>(ldr);
+
+  <span class="ck">if</span> (ldr &gt; NGUONG) {
+    <span class="cf">digitalWrite</span>(LED_PIN, <span class="cf">HIGH</span>);  <span <span class="ck">class</span>="cc">// Tối → Bật đèn</span>
+    <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cs">&quot;  → TỐI: ĐÈN BẬT&quot;</span>);
+  } <span class="ck">else</span> {
+    <span class="cf">digitalWrite</span>(LED_PIN, <span class="cf">LOW</span>);   <span <span class="ck">class</span>="cc">// Sáng → Tắt đèn</span>
+    <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cs">&quot;  → SÁNG: đèn tắt&quot;</span>);
+  }
+  <span class="cf">delay</span>(<span class="cn">200</span>);
+}
+
+<span <span class="ck">class</span>="cc">// Hiệu chỉnh ngưỡng:</span>
+<span <span class="ck">class</span>="cc">// Mở <span class="cf">Serial</span> Monitor → che LDR bằng tay → ghi giá trị tối</span>
+<span <span class="ck">class</span>="cc">// Thả tay → ghi giá trị sáng → đặt NGUONG ở khoảng giữa</span></pre>
+</div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L51')">← Trước</button><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('L53')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-L53">
+<div class="les-tag">Module 5 · Cảm biến</div>
+<div class="les-title">Bài 8: DHT22 — Nhiệt độ & Độ ẩm</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Cài thư viện DHT của Adafruit</li><li>Kết nối DHT22 đúng với điện trở pull-up 10kΩ</li><li>Đọc nhiệt độ và độ ẩm, kiểm tra lỗi isnan()</li><li>Cảnh báo khi vượt ngưỡng</li></ul></div>
+<h3>🛒 Linh kiện</h3>
+<div class="comp-grid"><div class="comp"><div class="comp-icon">🌡️</div><div><div class="comp-name">Cảm biến DHT22</div><div class="comp-det">Temp + Humidity</div><div class="comp-qty">1 cái · ~80k</div></div></div><div class="comp"><div class="comp-icon">🟫</div><div><div class="comp-name">Điện trở 10kΩ</div><div class="comp-det">Pull-up data line</div><div class="comp-qty">1 cái</div></div></div><div class="comp"><div class="comp-icon">🌈</div><div><div class="comp-name">Dây jumper</div><div class="comp-det">VCC, DATA, GND</div><div class="comp-qty">3 sợi</div></div></div></div>
+<h3>🔌 Kết nối DHT22</h3>
+<div class="svg-wrap">
+<svg viewBox="0 0 480 170" width="100%">
+  <rect x="170" y="25" width="140" height="100" rx="8" fill="#1a2535" stroke="#60a5fa" stroke-width="1.5"/>
+  <text x="240" y="50" fill="#60a5fa" font-size="12" text-anchor="middle" font-family="system-ui" font-weight="700">DHT22</text>
+  <line x1="200" y1="125" x2="200" y2="145" stroke="#ef4444" stroke-width="2"/>
+  <line x1="225" y1="125" x2="225" y2="145" stroke="#60a5fa" stroke-width="2"/>
+  <line x1="255" y1="125" x2="255" y2="145" stroke="#8499bb" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="280" y1="125" x2="280" y2="145" stroke="#22d3a4" stroke-width="2"/>
+  <text x="200" y="158" fill="#ef4444" font-size="8" text-anchor="middle" font-family="monospace">VCC</text>
+  <text x="225" y="158" fill="#60a5fa" font-size="8" text-anchor="middle" font-family="monospace">DATA</text>
+  <text x="255" y="158" fill="#8499bb" font-size="8" text-anchor="middle" font-family="monospace">NC</text>
+  <text x="280" y="158" fill="#22d3a4" font-size="8" text-anchor="middle" font-family="monospace">GND</text>
+  <line x1="200" y1="145" x2="80" y2="145" stroke="#ef4444" stroke-width="1" stroke-dasharray="4 2"/>
+  <line x1="225" y1="145" x2="80" y2="130" stroke="#60a5fa" stroke-width="1" stroke-dasharray="4 2"/>
+  <line x1="280" y1="145" x2="80" y2="115" stroke="#22d3a4" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="75" y="149" fill="#ef4444" font-size="9" text-anchor="end" font-family="system-ui">→ Arduino 5V</text>
+  <text x="75" y="133" fill="#60a5fa" font-size="9" text-anchor="end" font-family="system-ui">→ Arduino D4</text>
+  <text x="75" y="118" fill="#22d3a4" font-size="9" text-anchor="end" font-family="system-ui">→ Arduino GND</text>
+  <line x1="225" y1="35" x2="225" y2="62" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3 2"/>
+  <rect x="210" y="18" width="30" height="14" rx="3" fill="#2d1a00" stroke="#fbbf24"/>
+  <text x="225" y="28" fill="#fbbf24" font-size="8" text-anchor="middle" font-family="system-ui">10kΩ pull-up</text>
+  <line x1="225" y1="18" x2="200" y2="10" stroke="#ef4444" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="196" y="9" fill="#8499bb" font-size="8" text-anchor="end" font-family="system-ui">→ 5V</text>
+</svg>
+</div><div class="step"><div class="step-n">1</div><div class="step-body"><div class="step-title">Mở Library Manager</div><div class="step-desc">Sketch → Include Library → Manage Libraries (Ctrl+Shift+I)</div></div></div><div class="step"><div class="step-n">2</div><div class="step-body"><div class="step-title">Tìm và cài DHT</div><div class="step-desc">Gõ 'DHT sensor library' → tìm của <strong>Adafruit</strong> → Install</div></div></div><div class="step"><div class="step-n">3</div><div class="step-body"><div class="step-title">Cài dependencies</div><div class="step-desc">Nhấn 'Install All' khi IDE hỏi cài Adafruit Unified Sensor</div></div></div><div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><span <span class="ck">class</span>="cp">#include</span> &lt;DHT.h&gt;           <span <span class="ck">class</span>="cc">// Include thư viện</span>
+
+<span <span class="ck">class</span>="cp">#define</span> DHT_PIN  <span class="cn">4</span>
+<span <span class="ck">class</span>="cp">#define</span> DHT_TYPE DHT22
+
+DHT <span class="cf">dht</span>(DHT_PIN, DHT_TYPE);  <span <span class="ck">class</span>="cc">// Tạo đối tượng DHT</span>
+
+<span class="ck">void</span> <span class="cf">setup</span>() {
+  <span class="cf">Serial</span>.<span class="cf">begin</span>(<span class="cn">9600</span>);
+  <span class="cf">dht</span>.<span class="cf">begin</span>();
+}
+
+<span class="ck">void</span> <span class="cf">loop</span>() {
+  <span class="cf">delay</span>(<span class="cn">2000</span>);  <span <span class="ck">class</span>="cc">// DHT22 cần TỐI THIỂU <span class="cn">2</span> giây giữa các lần đọc!</span>
+
+  <span class="ck">float</span> nhietDo = <span class="cf">dht</span>.<span class="cf">readTemperature</span>();  <span <span class="ck">class</span>="cc">// Celsius</span>
+  <span class="ck">float</span> doAm    = <span class="cf">dht</span>.<span class="cf">readHumidity</span>();     <span <span class="ck">class</span>="cc">// %</span>
+
+  <span class="ck">if</span> (<span class="cf">isnan</span>(nhietDo) || <span class="cf">isnan</span>(doAm)) {    <span <span class="ck">class</span>="cc">// <span class="cf">isnan</span> = <span class="cs">&quot;is not a number&quot;</span></span>
+    <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cs">&quot;[LỖI] Không đọc được DHT22!&quot;</span>);
+    <span class="ck">return</span>;
+  }
+
+  <span class="cf">Serial</span>.<span class="cf">print</span>(<span class="cs">&quot;Nhiệt độ: &quot;</span>); <span class="cf">Serial</span>.<span class="cf">print</span>(nhietDo, <span class="cn">1</span>); <span class="cf">Serial</span>.<span class="cf">print</span>(<span class="cs">&quot;°C  &quot;</span>);
+  <span class="cf">Serial</span>.<span class="cf">print</span>(<span class="cs">&quot;Độ ẩm: &quot;</span>);   <span class="cf">Serial</span>.<span class="cf">print</span>(doAm, <span class="cn">1</span>);    <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cs">&quot;%&quot;</span>);
+
+  <span class="ck">if</span> (nhietDo &gt; <span class="cn">30</span>) <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cs">&quot;⚠️ QUÁ NÓNG!&quot;</span>);
+  <span class="ck">if</span> (doAm    &gt; <span class="cn">80</span>) <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cs">&quot;⚠️ ĐỘ ẨM CAO!&quot;</span>);
+}</pre>
+</div><div class="box box-err"><div class="box-lbl">🔴 Lỗi thường gặp</div><strong>Luôn in 'Lỗi đọc':</strong> Kiểm tra chân DATA đúng chưa, có điện trở 10kΩ pull-up chưa.<br><strong>Số kỳ lạ (-40, 999):</strong> delay() quá ngắn — DHT22 cần tối thiểu 2000ms.</div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L52')">← Trước</button><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('L61')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-L61">
+<div class="les-tag">Module 6 · IoT</div>
+<div class="les-title">Bài 9: ESP32 & WiFi — Kết nối Internet</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Cài ESP32 board package vào Arduino IDE</li><li>Kết nối WiFi và xác nhận địa chỉ IP</li><li>Gửi dữ liệu lên server bằng HTTP GET</li><li>Xử lý mất kết nối và tự reconnect</li></ul></div><div class="box box-warn"><div class="box-lbl">⚠️ ESP32 dùng 3.3V logic!</div>Không nối cảm biến 5V trực tiếp vào GPIO ESP32. Cần level shifter hoặc dùng cảm biến hỗ trợ 3.3V. DHT22 hoạt động được với 3.3V-5V.</div><div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><span <span class="ck">class</span>="cp">#include</span> &lt;<span class="cf">WiFi</span>.h&gt;
+
+<span class="ck">const</span> <span class="ck">char</span>* ssid     = <span class="cs">&quot;Ten_WiFi_Cua_Ban&quot;</span>;
+<span class="ck">const</span> <span class="ck">char</span>* password = <span class="cs">&quot;mat_khau_wifi&quot;</span>;
+
+<span class="ck">void</span> <span class="cf">setup</span>() {
+  <span class="cf">Serial</span>.<span class="cf">begin</span>(<span class="cn">115200</span>);
+  <span class="cf">Serial</span>.<span class="cf">print</span>(<span class="cs">&quot;Đang kết nối <span class="cf">WiFi</span>&quot;</span>);
+
+  <span class="cf">WiFi</span>.<span class="cf">begin</span>(ssid, password);
+
+  <span class="ck">while</span> (<span class="cf">WiFi</span>.status() != WL_CONNECTED) {
+    <span class="cf">delay</span>(<span class="cn">500</span>); <span class="cf">Serial</span>.<span class="cf">print</span>(<span class="cs">&quot;.&quot;</span>);
+  }
+
+  <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cs">&quot;\n✓ Kết nối thành công!&quot;</span>);
+  <span class="cf">Serial</span>.<span class="cf">print</span>(<span class="cs">&quot;IP: &quot;</span>); <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cf">WiFi</span>.localIP());
+}
+
+<span class="ck">void</span> <span class="cf">loop</span>() {
+  <span <span class="ck">class</span>="cc">// Tự động kết nối lại nếu mất <span class="cf">WiFi</span></span>
+  <span class="ck">if</span> (<span class="cf">WiFi</span>.status() != WL_CONNECTED) {
+    <span class="cf">Serial</span>.<span class="cf">println</span>(<span class="cs">&quot;<span class="cf">WiFi</span> mất — đang kết nối lại...&quot;</span>);
+    <span class="cf">WiFi</span>.reconnect();
+    <span class="cf">delay</span>(<span class="cn">5000</span>);
+  }
+}</pre>
+</div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L53')">← Trước</button><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('L62')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-L62">
+<div class="les-tag">Module 6 · IoT</div>
+<div class="les-title">Bài 10: MQTT — Gửi dữ liệu lên Cloud</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Hiểu mô hình Publish/Subscribe của MQTT</li><li>Kết nối ESP32 với MQTT broker công cộng</li><li>Gửi (publish) dữ liệu cảm biến lên topic</li><li>Nhận (subscribe) lệnh điều khiển từ app</li></ul></div><div class="box box-info"><div class="box-lbl">📡 MQTT hoạt động thế nào?</div><strong>Publisher (ESP32):</strong> Gửi dữ liệu lên Broker theo 'topic'. Ví dụ: nha/nhietdo = 25.3<br><strong>Broker:</strong> Trung tâm phân phối. Broker miễn phí: broker.hivemq.com<br><strong>Subscriber (App):</strong> Đăng ký nhận dữ liệu theo topic, nhận ngay khi có message mới</div><div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><span <span class="ck">class</span>="cc">// Cài thư viện: PubSubClient (Nick O&<span <span class="ck">class</span>="cp">#x27</span>;Leary)</span>
+<span <span class="ck">class</span>="cp">#include</span> &lt;<span class="cf">WiFi</span>.h&gt;
+<span <span class="ck">class</span>="cp">#include</span> &lt;PubSubClient.h&gt;
+<span <span class="ck">class</span>="cp">#include</span> &lt;DHT.h&gt;
+
+<span class="ck">const</span> <span class="ck">char</span>* mqtt_server = <span class="cs">&quot;broker.hivemq.com&quot;</span>;  <span <span class="ck">class</span>="cc">// Broker miễn phí</span>
+
+WiFiClient   espClient;
+PubSubClient <span class="cf">client</span>(espClient);
+DHT <span class="cf">dht</span>(<span class="cn">4</span>, DHT22);
+
+<span class="ck">void</span> <span class="cf">callback</span>(<span class="ck">char</span>* topic, <span class="ck">byte</span>* payload, unsigned <span class="ck">int</span> len) {
+  <span class="ck">String</span> msg = <span class="cs">&quot;&quot;</span>;
+  <span class="ck">for</span>(<span class="ck">int</span> i=<span class="cn">0</span>; i&lt;len; i++) msg += (<span class="ck">char</span>)payload[i];
+  <span class="ck">if</span> (msg == <span class="cs">&quot;bat&quot;</span>) <span class="cf">digitalWrite</span>(<span class="cn">2</span>, <span class="cf">HIGH</span>);  <span <span class="ck">class</span>="cc">// Nhận lệnh bật</span>
+  <span class="ck">if</span> (msg == <span class="cs">&quot;tat&quot;</span>) <span class="cf">digitalWrite</span>(<span class="cn">2</span>, <span class="cf">LOW</span>);   <span <span class="ck">class</span>="cc">// Nhận lệnh tắt</span>
+}
+
+<span class="ck">void</span> <span class="cf">setup</span>() {
+  <span class="cf">WiFi</span>.<span class="cf">begin</span>(<span class="cs">&quot;ssid&quot;</span>, <span class="cs">&quot;pass&quot;</span>);
+  <span class="ck">while</span>(<span class="cf">WiFi</span>.status()!=WL_CONNECTED) <span class="cf">delay</span>(<span class="cn">500</span>);
+  <span class="cf">client</span>.setServer(mqtt_server, <span class="cn">1883</span>);
+  <span class="cf">client</span>.setCallback(<span class="cf">callback</span>);
+  <span class="cf">dht</span>.<span class="cf">begin</span>();
+}
+
+<span class="ck">void</span> <span class="cf">loop</span>() {
+  <span class="ck">if</span> (!<span class="cf">client</span>.connected()) {
+    <span class="cf">client</span>.connect(<span class="cs">&quot;ESP32_&quot;</span> + <span class="ck">String</span>(random(<span class="cn">9999</span>)));
+    <span class="cf">client</span>.subscribe(<span class="cs">&quot;nha/lenh&quot;</span>);     <span <span class="ck">class</span>="cc">// Nhận lệnh</span>
+  }
+  <span class="cf">client</span>.<span class="cf">loop</span>();
+
+  static <span class="ck">long</span> last = <span class="cn">0</span>;
+  <span class="ck">if</span> (<span class="cf">millis</span>()-last &gt; <span class="cn">10000</span>) {        <span <span class="ck">class</span>="cc">// Gửi mỗi <span class="cn">10</span> giây</span>
+    last = <span class="cf">millis</span>();
+    <span class="cf">client</span>.publish(<span class="cs">&quot;nha/nhietdo&quot;</span>, <span class="ck">String</span>(<span class="cf">dht</span>.<span class="cf">readTemperature</span>(),<span class="cn">1</span>).c_str());
+    <span class="cf">client</span>.publish(<span class="cs">&quot;nha/doam&quot;</span>,    <span class="ck">String</span>(<span class="cf">dht</span>.<span class="cf">readHumidity</span>(),<span class="cn">1</span>).c_str());
+  }
+}</pre>
+</div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L61')">← Trước</button><div style="flex:1"></div><button class="btn btn-pri" onclick="goTo('PRJ')">Bài tiếp →</button></div>
+</div><div class="lesson" id="page-PRJ">
+<div class="les-tag">Dự án tổng hợp</div>
+<div class="les-title">🏆 Dự án: Trạm thời tiết IoT Mini</div>
+<div class="obj"><div class="obj-lbl">🎯 Sau bài này bạn sẽ:</div><ul><li>Tích hợp DHT22 + LED + WiFi + MQTT thành hệ thống hoàn chỉnh</li><li>Dùng millis() để đa nhiệm không blocking</li><li>Gửi dữ liệu lên cloud và nhận lệnh từ app</li><li>Có code đầy đủ sẵn sàng chạy thực tế</li></ul></div>
+<div class="comp-grid"><div class="comp"><div class="comp-icon">🔴</div><div><div class="comp-name">ESP32 DevKit</div><div class="comp-det">Main controller</div><div class="comp-qty">1 cái</div></div></div><div class="comp"><div class="comp-icon">🌡️</div><div><div class="comp-name">DHT22</div><div class="comp-det">Temp + Humidity</div><div class="comp-qty">1 cái</div></div></div><div class="comp"><div class="comp-icon">🔴</div><div><div class="comp-name">LED đỏ</div><div class="comp-det">Cảnh báo nóng</div><div class="comp-qty">1 cái</div></div></div><div class="comp"><div class="comp-icon">🟡</div><div><div class="comp-name">LED vàng</div><div class="comp-det">Cảnh báo ẩm</div><div class="comp-qty">1 cái</div></div></div><div class="comp"><div class="comp-icon">🟢</div><div><div class="comp-name">LED xanh</div><div class="comp-det">OK</div><div class="comp-qty">1 cái</div></div></div><div class="comp"><div class="comp-icon">🟫</div><div><div class="comp-name">Điện trở 220Ω</div><div class="comp-det">Cho 3 LED</div><div class="comp-qty">3 cái</div></div></div><div class="comp"><div class="comp-icon">🟫</div><div><div class="comp-name">Điện trở 10kΩ</div><div class="comp-det">Pull-up DHT</div><div class="comp-qty">1 cái</div></div></div></div><div class="code-wrap">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  <pre><span <span class="ck">class</span>="cc">// ═══ TRẠM THỜI TIẾT IOT MINI ═══</span>
+<span <span class="ck">class</span>="cp">#include</span> &lt;<span class="cf">WiFi</span>.h&gt;
+<span <span class="ck">class</span>="cp">#include</span> &lt;PubSubClient.h&gt;
+<span <span class="ck">class</span>="cp">#include</span> &lt;DHT.h&gt;
+
+<span class="ck">const</span> <span class="ck">char</span>* WIFI_SSID = <span class="cs">&quot;Ten_WiFi&quot;</span>;
+<span class="ck">const</span> <span class="ck">char</span>* WIFI_PASS = <span class="cs">&quot;MatKhau&quot;</span>;
+<span class="ck">const</span> <span class="ck">char</span>* MQTT_HOST = <span class="cs">&quot;broker.hivemq.com&quot;</span>;
+
+<span <span class="ck">class</span>="cp">#define</span> DHT_PIN   <span class="cn">4</span>
+<span <span class="ck">class</span>="cp">#define</span> LED_DO   <span class="cn">11</span>
+<span <span class="ck">class</span>="cp">#define</span> LED_VANG <span class="cn">10</span>
+<span <span class="ck">class</span>="cp">#define</span> LED_XANH  <span class="cn">9</span>
+
+<span class="ck">const</span> <span class="ck">float</span> NGUONG_NONG = <span class="cn">30.0</span>;  <span <span class="ck">class</span>="cc">// °C cảnh báo nóng</span>
+<span class="ck">const</span> <span class="ck">float</span> NGUONG_AM   = <span class="cn">80.0</span>;  <span <span class="ck">class</span>="cc">// % cảnh báo ẩm</span>
+<span class="ck">const</span> <span class="ck">long</span>  CHU_KY_DOC  = <span class="cn">5000</span>;  <span <span class="ck">class</span>="cc">// Đọc cảm biến mỗi 5s</span>
+<span class="ck">const</span> <span class="ck">long</span>  CHU_KY_MQTT = <span class="cn">10000</span>; <span <span class="ck">class</span>="cc">// Gửi MQTT mỗi 10s</span>
+
+DHT <span class="cf">dht</span>(DHT_PIN, DHT22);
+WiFiClient espClient;
+PubSubClient <span class="cf">mqtt</span>(espClient);
+<span class="ck">float</span> nhietDo = <span class="cn">0</span>, doAm = <span class="cn">0</span>;
+<span class="ck">long</span>  lastDoc = <span class="cn">0</span>, lastMQTT = <span class="cn">0</span>;
+
+<span class="ck">void</span> tatHetLED() {
+  <span class="cf">digitalWrite</span>(LED_DO,<span class="cf">LOW</span>); <span class="cf">digitalWrite</span>(LED_VANG,<span class="cf">LOW</span>); <span class="cf">digitalWrite</span>(LED_XANH,<span class="cf">LOW</span>);
+}
+
+<span class="ck">void</span> capNhatLED() {
+  tatHetLED();
+  <span class="ck">if</span>      (nhietDo &gt; NGUONG_NONG) <span class="cf">digitalWrite</span>(LED_DO,   <span class="cf">HIGH</span>);
+  <span class="ck">else</span> <span class="ck">if</span> (doAm    &gt; NGUONG_AM)   <span class="cf">digitalWrite</span>(LED_VANG, <span class="cf">HIGH</span>);
+  <span class="ck">else</span>                             <span class="cf">digitalWrite</span>(LED_XANH, <span class="cf">HIGH</span>);
+}
+
+<span class="ck">void</span> <span class="cf">setup</span>() {
+  <span class="cf">Serial</span>.<span class="cf">begin</span>(<span class="cn">115200</span>);
+  <span class="cf">dht</span>.<span class="cf">begin</span>();
+  <span class="cf">pinMode</span>(LED_DO,<span class="cf">OUTPUT</span>); <span class="cf">pinMode</span>(LED_VANG,<span class="cf">OUTPUT</span>); <span class="cf">pinMode</span>(LED_XANH,<span class="cf">OUTPUT</span>);
+  <span class="cf">digitalWrite</span>(LED_XANH, <span class="cf">HIGH</span>);  <span <span class="ck">class</span>="cc">// LED xanh lúc khởi động</span>
+  <span class="cf">WiFi</span>.<span class="cf">begin</span>(WIFI_SSID, WIFI_PASS);
+  <span class="ck">while</span>(<span class="cf">WiFi</span>.status()!=WL_CONNECTED) <span class="cf">delay</span>(<span class="cn">500</span>);
+  <span class="cf">mqtt</span>.setServer(MQTT_HOST, <span class="cn">1883</span>);
+  <span class="cf">mqtt</span>.connect(<span class="cs">&quot;TramThoiTiet&quot;</span>);
+}
+
+<span class="ck">void</span> <span class="cf">loop</span>() {
+  <span class="ck">if</span> (!<span class="cf">mqtt</span>.connected()) <span class="cf">mqtt</span>.connect(<span class="cs">&quot;TramThoiTiet&quot;</span>);
+  <span class="cf">mqtt</span>.<span class="cf">loop</span>();
+
+  <span class="ck">long</span> now = <span class="cf">millis</span>();
+
+  <span <span class="ck">class</span>="cc">// Task <span class="cn">1</span>: Đọc cảm biến mỗi <span class="cn">5</span> giây (non-blocking)</span>
+  <span class="ck">if</span> (now - lastDoc &gt;= CHU_KY_DOC) {
+    lastDoc = now;
+    <span class="ck">float</span> t = <span class="cf">dht</span>.<span class="cf">readTemperature</span>();
+    <span class="ck">float</span> h = <span class="cf">dht</span>.<span class="cf">readHumidity</span>();
+    <span class="ck">if</span> (!<span class="cf">isnan</span>(t) &amp;&amp; !<span class="cf">isnan</span>(h)) {
+      nhietDo = t; doAm = h;
+      <span class="cf">Serial</span>.printf(<span class="cs">&quot;[%lus] 🌡 %.1f°C  💧 %.1f%%\n&quot;</span>, now/<span class="cn">1000</span>, t, h);
+      capNhatLED();
+    }
+  }
+
+  <span <span class="ck">class</span>="cc">// Task <span class="cn">2</span>: Gửi MQTT mỗi <span class="cn">10</span> giây (non-blocking)</span>
+  <span class="ck">if</span> (now - lastMQTT &gt;= CHU_KY_MQTT) {
+    lastMQTT = now;
+    <span class="cf">mqtt</span>.publish(<span class="cs">&quot;tram/nhietdo&quot;</span>, <span class="ck">String</span>(nhietDo,<span class="cn">1</span>).c_str());
+    <span class="cf">mqtt</span>.publish(<span class="cs">&quot;tram/doam&quot;</span>,    <span class="ck">String</span>(doAm,<span class="cn">1</span>).c_str());
+  }
+}</pre>
+</div><div class="box box-tip"><div class="box-lbl">🚀 Mở rộng dự án</div>• Thêm màn hình OLED I2C (SSD1306) hiển thị nhiệt độ trực tiếp<br>• Thêm Deep Sleep tiết kiệm pin (esp_deep_sleep_start())<br>• Kết nối Home Assistant để tích hợp nhà thông minh<br>• Gửi cảnh báo Telegram khi nhiệt độ > ngưỡng</div><div style="text-align:center;padding:24px 0 8px;border-top:1px solid var(--bd);margin-top:24px">
+<div style="font-size:32px;margin-bottom:8px">🎉</div>
+<div style="font-size:17px;font-weight:700;color:var(--gr);margin-bottom:6px">Hoàn thành khóa học cơ bản!</div>
+<div style="font-size:13px;color:var(--mu);line-height:1.75;max-width:460px;margin:0 auto">Bạn đã nắm điện tử cơ bản, lập trình MCU, điều khiển LED, đọc cảm biến, kết nối IoT. Hãy bắt đầu dự án thực tế ngay — đó là cách học nhanh nhất!</div>
+</div>
+<div class="nav-btns"><button class="btn btn-out" onclick="goTo('L62')">← Trước</button><div style="flex:1"></div></div>
+</div></div>
+</div>
+
+<!-- AI CHAT PANEL -->
+<div class="chat-panel hidden" id="chat-panel">
+  <div class="chat-hdr">
+    <div class="chat-avatar">🤖</div>
+    <div class="chat-info">
+      <div class="chat-name">Trợ lý AI IoT</div>
+      <div class="chat-ctx" id="chat-ctx">Đang học: Bài 1</div>
+    </div>
+    <button class="chat-close" onclick="closeChat()">✕</button>
+  </div>
+  <div class="chat-msgs" id="chat-msgs">
+    <div class="msg ai">
+      <div class="msg-icon">🤖</div>
+      <div class="msg-bubble">Xin chào! 👋 Tôi là trợ lý AI của khóa học IoT Nhúng.\n\nHãy hỏi tôi bất cứ điều gì bạn chưa hiểu về bài đang học — lý thuyết, code, hoặc cách kết nối mạch!</div>
+    </div>
+  </div>
+  <div class="quick-q" id="quick-q"></div>
+  <div class="api-notice" id="api-notice" style="display:none">
+    ⚠️ Cần API key: <a href="https://console.anthropic.com" target="_blank">lấy key tại đây</a> →
+    <input id="api-key-input" placeholder="sk-ant-..." style="padding:2px 6px;border-radius:4px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-size:11px;width:120px;margin:0 4px">
+    <button onclick="saveKey()" style="padding:2px 7px;border-radius:4px;border:1px solid var(--grR);background:var(--grB);color:var(--gr);font-size:11px;cursor:pointer">Lưu</button>
+  </div>
+  <div class="chat-input-row">
+    <textarea class="chat-input" id="chat-input" placeholder="Hỏi bất cứ điều gì..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="send-btn" id="send-btn" onclick="sendMsg()">↑</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const ALL_IDS = ['L11', 'L12', 'L13', 'L21', 'L22', 'L31', 'L32', 'L33', 'L41', 'L42', 'L51', 'L52', 'L53', 'L61', 'L62', 'PRJ'];
+const QUICKQ  = {"L11":[`Điện áp và dòng điện khác nhau thế nào?`,`Tại sao LED phải có điện trở?`,`DC và AC là gì?`,`Cách tính điện trở cho LED?`],"L12":[`Định luật Ohm cho ví dụ thực tế?`,`Đọc màu điện trở 220Ω thế nào?`,`Mạch nối tiếp và song song khác nhau thế nào?`,`Tại sao phải chọn điện trở tiêu chuẩn gần nhất?`],"L13":[`Breadboard hoạt động thế nào bên trong?`,`Chế độ thông mạch (continuity) dùng để làm gì?`,`Cách đo điện áp DC bằng multimeter?`,`Cần mua những linh kiện nào để bắt đầu học?`],"L21":[`Flash và RAM khác nhau thế nào?`,`Khi nào dùng Arduino, khi nào dùng ESP32?`,`GPIO có bao nhiêu loại?`,`Tại sao MCU không cần hệ điều hành?`],"L22":[`Tại sao không thấy cổng COM khi cắm USB?`,`setup() và loop() khác nhau thế nào?`,`Serial Monitor dùng để làm gì?`,`Lỗi avrdude là gì và sửa thế nào?`],"L31":[`pinMode OUTPUT và INPUT khác nhau thế nào?`,`Tại sao cần delay() trong loop()?`,`Làm sao LED nhấp nháy nhanh hơn?`,`Sơ đồ kết nối LED với Arduino cụ thể?`],"L32":[`Tại sao nên dùng hàm riêng thay vì viết thẳng?`,`void có nghĩa là gì?`,`Làm thế nào thêm chế độ đêm khuya?`,`Cách kết nối 3 LED cùng lúc trên breadboard?`],"L33":[`PWM là gì và duty cycle là gì?`,`Chân nào của Arduino hỗ trợ PWM?`,`analogWrite() khác digitalWrite() thế nào?`,`Làm sao điều khiển tốc độ motor bằng PWM?`],"L41":[`Tại sao cần pull-up resistor?`,`INPUT_PULLUP khác INPUT thế nào?`,`Nút nhấn 4 chân cắm vào breadboard thế nào?`,`Tại sao nhấn nút lại đọc LOW thay vì HIGH?`],"L42":[`Debounce là gì và tại sao cần thiết?`,`Tại sao nhấn 1 lần lại đọc được nhiều lần?`,`millis() hơn delay() ở điểm nào?`,`bool là kiểu dữ liệu gì?`],"L51":[`ADC là gì và analogRead() trả về bao nhiêu?`,`map() dùng để làm gì?`,`Cách kết nối biến trở (potentiometer) 3 chân?`,`Tại sao không dùng analogRead() trực tiếp mà cần map()?`],"L52":[`LDR hoạt động thế nào?`,`Mạch chia áp là gì?`,`Ngưỡng phải chọn bao nhiêu?`,`Làm sao tự động bật đèn khi trời tối?`],"L53":[`Cách cài thư viện trong Arduino IDE?`,`isnan() để làm gì?`,`Tại sao cần delay 2 giây với DHT22?`,`Kết nối DHT22 cụ thể thế nào?`],"L61":[`Cài board ESP32 vào Arduino IDE thế nào?`,`Tại sao ESP32 dùng 3.3V?`,`WiFi.status() WL_CONNECTED là gì?`,`Làm sao gửi HTTP request từ ESP32?`],"L62":[`MQTT là gì và tại sao dùng cho IoT?`,`Topic trong MQTT là gì?`,`Broker MQTT miễn phí nào để test?`,`Publish và Subscribe là gì?`],"PRJ":[`Tại sao dùng millis() thay delay() trong dự án?`,`Làm sao thêm màn hình OLED?`,`Cách gửi cảnh báo qua Telegram?`,`Làm sao đặt ESP32 vào Deep Sleep tiết kiệm pin?`]};
+const TITLES  = {"L11":"Điện áp, Dòng điện và Điện trở","L12":"Định luật Ohm & Tính mạch","L13":"Breadboard & Dụng cụ đo điện","L21":"Vi điều khiển (MCU) — Kiến trúc & Chọn board","L22":"Cài Arduino IDE & Chương trình đầu tiên","L31":"Bài 1: LED Blink — Dự án đầu tiên","L32":"Bài 2: Đèn giao thông (3 LED + Hàm)","L33":"Bài 3: PWM — Điều chỉnh mờ sáng LED","L41":"Bài 4: Đọc nút nhấn & Pull-up Resistor","L42":"Bài 5: Toggle LED & Chống rung (Debounce)","L51":"Bài 6: Biến trở & ADC — Tín hiệu Analog","L52":"Bài 7: Cảm biến ánh sáng LDR","L53":"Bài 8: DHT22 — Nhiệt độ & Độ ẩm","L61":"Bài 9: ESP32 & WiFi — Kết nối Internet","L62":"Bài 10: MQTT — Gửi dữ liệu lên Cloud","PRJ":"🏆 Dự án: Trạm thời tiết IoT Mini"};
+let currentLesson = 'L11';
+let done = new Set(['L11']);
+let sidebarOpen = true;
+let chatOpen = false;
+let apiKey = '';
+let chatHistory = [];
+let isTyping = false;
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function goTo(id) {
+  if (!LESSONS_DATA[id]) return;
+  // Hide current
+  document.getElementById('page-' + currentLesson)?.classList.remove('show');
+  document.getElementById('nav-' + currentLesson)?.classList.remove('active');
+  // Show new
+  currentLesson = id;
+  done.add(id);
+  document.getElementById('page-' + id)?.classList.add('show');
+  const navBtn = document.getElementById('nav-' + id);
+  if (navBtn) { navBtn.classList.add('active'); navBtn.classList.remove('done'); }
+  // Update done state for other btns
+  done.forEach(d => {
+    if (d !== id) {
+      const b = document.getElementById('nav-' + d);
+      if (b) b.classList.add('done');
+    }
+  });
+  // Scroll top
+  document.getElementById('main').scrollTop = 0;
+  // Update top bar
+  document.getElementById('top-lesson').textContent = TITLES[id] || id;
+  // Update AI context
+  document.getElementById('chat-ctx').textContent = 'Đang học: ' + (TITLES[id] || id).slice(0,30) + '...';
+  // Update quick questions
+  renderQuickQ(id);
+  // Update progress
+  updateProgress();
+  // Reset AI context
+  chatHistory = [];
+}
+
+const LESSONS_DATA = {"L11":true,"L12":true,"L13":true,"L21":true,"L22":true,"L31":true,"L32":true,"L33":true,"L41":true,"L42":true,"L51":true,"L52":true,"L53":true,"L61":true,"L62":true,"PRJ":true};
+
+function toggleMod(hdr) {
+  const arrow = hdr.querySelector('.mod-arrow');
+  const list = hdr.nextElementSibling;
+  arrow.classList.toggle('open');
+  list.classList.toggle('open');
+}
+
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
+}
+
+function updateProgress() {
+  const pct = Math.round(done.size / ALL_IDS.length * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+}
+
+// ═══════════════════════════════════════════════════════
+// COPY CODE
+// ═══════════════════════════════════════════════════════
+function copyCode(btn) {
+  const pre = btn.nextElementSibling;
+  navigator.clipboard?.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// SIMULATIONS
+// ═══════════════════════════════════════════════════════
+let ledTimer = null, ledState = false, sosIdx = 0;
+const SOS = [200,200,200,200,200,600,600,200,600,200,600,600,200,200,200,200,200,1200];
+const CODES = {stop:'// LED dừng',slow:'delay(2000);',norm:'delay(1000);',fast:'delay(200);',sos:'// Morse SOS (...---...)'};
+
+function ledMode(mode) {
+  clearTimeout(ledTimer);
+  document.querySelectorAll('[id^=btn-]').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-'+mode)?.classList.add('active');
+  document.getElementById('led-code-display').textContent = CODES[mode] || '';
+  if (mode === 'stop') { setLed1(false); return; }
+  if (mode === 'sos') { sosIdx=0; runSOS(); return; }
+  const delays = {slow:2000,norm:1000,fast:200};
+  runBlink(delays[mode]);
+}
+
+function runBlink(d) {
+  ledState = !ledState;
+  setLed1(ledState);
+  ledTimer = setTimeout(() => runBlink(d), d);
+}
+
+function runSOS() {
+  ledState = sosIdx % 2 === 0;
+  setLed1(ledState);
+  ledTimer = setTimeout(() => { sosIdx=(sosIdx+1)%SOS.length; runSOS(); }, SOS[sosIdx]);
+}
+
+function setLed1(on) {
+  const el = document.getElementById('led1');
+  if (!el) return;
+  el.className = 'led-dot' + (on ? ' on' : '');
+  const s = document.getElementById('led1-state');
+  if (s) { s.textContent = on ? 'HIGH' : 'LOW'; s.style.color = on ? 'var(--gr)' : 'var(--re)'; }
+}
+
+// Traffic light
+let tlTimer = null, tlPhase = 0, tlRunning = false;
+const TL_SEQ = [['red','🔴 DỪNG',4000],['amber','🟡 CHUẨN BỊ',1500],['green','🟢 ĐI',3000],['amber','🟡 SẮP ĐỎ',1500]];
+
+function startTL() {
+  if (tlRunning) return;
+  tlRunning = true;
+  tlPhase = 0;
+  runTLPhase();
+}
+
+function stopTL() {
+  tlRunning = false;
+  clearTimeout(tlTimer);
+  ['tl-red','tl-amber','tl-green'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.className = 'led-dot';
+  });
+  const lbl = document.getElementById('tl-label');
+  if (lbl) lbl.textContent = 'Dừng';
+}
+
+function runTLPhase() {
+  if (!tlRunning) return;
+  const [col, label, dur] = TL_SEQ[tlPhase];
+  ['red','amber','green'].forEach(c => {
+    const el = document.getElementById('tl-'+c);
+    if (el) el.className = 'led-dot' + (c === col ? ' on-' + (col==='green'?'':'') + col : '');
+  });
+  // Fix: use correct class names
+  document.querySelectorAll('#tl-red,#tl-amber,#tl-green').forEach(el => el.className='led-dot');
+  const target = document.getElementById('tl-' + col);
+  if (target) target.className = 'led-dot on-' + (col==='red'?'red':col==='amber'?'amber':'');
+  // Green uses on class
+  if (col === 'green') { const g=document.getElementById('tl-green'); if(g) g.className='led-dot on'; }
+  const lbl = document.getElementById('tl-label');
+  if (lbl) { lbl.textContent = label; lbl.style.color = col==='red'?'var(--re)':col==='amber'?'var(--am)':'var(--gr)'; }
+  tlTimer = setTimeout(() => { tlPhase = (tlPhase+1) % TL_SEQ.length; runTLPhase(); }, dur);
+}
+
+// PWM Demo
+function updatePWM(v) {
+  v = parseInt(v);
+  const pct = Math.round(v/255*100);
+  const volt = (v/255*5).toFixed(2);
+  document.getElementById('pwm-val').textContent = v;
+  document.getElementById('pwm-duty').textContent = pct + '%';
+  document.getElementById('pwm-volt').textContent = volt + 'V';
+  document.getElementById('pwm-bright').textContent = pct<20?'Rất mờ':pct<50?'Mờ':pct<80?'Trung bình':'Sáng';
+  const led = document.getElementById('pwm-led');
+  if (led) {
+    const a = v/255;
+    led.style.background = `rgba(34,211,164,${a})`;
+    led.style.border = `2px solid ${v>10?'#10b981':'#2a3030'}`;
+led.style.boxShadow = v>10 ? `0 0 ${Math.round(a*20)}px rgba(34,211,164,${a*0.6})` : '';  }
+}
+
+// ADC Demo
+function updateADC(v) {
+  v = parseInt(v);
+  const volt = (v*5/1023).toFixed(2);
+  const pwm = Math.round(v/1023*255);
+  const pct = Math.round(v/1023*100);
+  document.getElementById('adc-pot').textContent = v;
+  document.getElementById('adc-raw').textContent = v;
+  document.getElementById('adc-volt').textContent = volt + 'V';
+  document.getElementById('adc-pwm').textContent = pwm;
+  document.getElementById('adc-pct').textContent = pct + '%';
+  const led = document.getElementById('adc-led');
+  if (led) {
+    const a = v/1023;
+    led.style.background = `rgba(34,211,164,${a})`;
+    led.style.border = `2px solid ${v>20?'#10b981':'#2a3030'}`;
+led.style.boxShadow = v>20 ? `0 0 ${Math.round(a*18)}px rgba(34,211,164,${a*0.5})` : '';  
+}
+}
+
+// Ohm Calculator
+function calcR() {
+  const inputs = document.querySelectorAll('#ohm-calc input[type="range"]');
+  if (inputs.length < 3) return; // Đảm bảo tìm thấy đủ 3 thanh trượt
+
+  const vcc = parseFloat(inputs[0].value);
+  const vf  = parseFloat(inputs[1].value);
+  const mA  = parseFloat(inputs[2].value);
+
+  document.getElementById('vcc-val').textContent = vcc + 'V';
+  document.getElementById('vf-val').textContent  = vf.toFixed(1) + 'V';
+  document.getElementById('ma-val').textContent  = mA + 'mA';
+
+  const r = (vcc - vf) / (mA / 1000);
+  const std = [10,22,33,47,56,68,82,100,120,150,180,220,270,330,390,470,560,680,820,1000,1500,2200,3300];
+  const near = std.reduce((p,c) => Math.abs(c-r)<Math.abs(p-r)?c:p);
+  const iR = (vcc-vf)/near*1000;
+
+  document.getElementById('r-need').textContent = Math.round(r) + 'Ω';
+  document.getElementById('r-use').textContent  = near + 'Ω';
+  document.getElementById('i-real').textContent = iR.toFixed(1) + 'mA';
+}
+
+// Init calculators when shown
+function reinitPage() {
+  if (document.getElementById('ohm-calc')) calcR();
+  if (document.getElementById('pwm-led')) updatePWM(128);
+  if (document.getElementById('adc-led')) updateADC(512);
+}
+
+// ═══════════════════════════════════════════════════════
+// AI CHAT
+// ═══════════════════════════════════════════════════════
+function openChat() {
+  chatOpen = true;
+  document.getElementById('chat-panel').classList.remove('hidden');
+  renderQuickQ(currentLesson);
+}
+function closeChat() {
+  chatOpen = false;
+  document.getElementById('chat-panel').classList.add('hidden');
+}
+
+function renderQuickQ(id) {
+  const qs = QUICKQ[id] || [];
+  const container = document.getElementById('quick-q');
+  container.innerHTML = qs.map(q => `<button class="q-btn" onclick="sendMsg('${q.replace(/'/g,"\\'")}')">❓ ${q}</button>`).join('');
+}
+
+function addMsg(role, text) {
+  const container = document.getElementById('chat-msgs');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.innerHTML = `<div class="msg-icon">${role==='ai'?'🤖':'👤'}</div><div class="msg-bubble">${text.replace(/\n/g,'<br>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>')}</div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showTyping() {
+  const container = document.getElementById('chat-msgs');
+  const div = document.createElement('div');
+  div.className = 'msg ai'; div.id = 'typing-indicator';
+  div.innerHTML = '<div class="msg-icon">🤖</div><div class="typing"><span></span><span></span><span></span></div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function hideTyping() {
+  document.getElementById('typing-indicator')?.remove();
+}
+
+async function sendMsg(text) {
+  const input = document.getElementById('chat-input');
+  const msg = text || input.value.trim();
+  if (!msg || isTyping) return;
+  input.value = '';
+  autoResize(input);
+  addMsg('user', msg);
+  isTyping = true;
+  document.getElementById('send-btn').disabled = true;
+  showTyping();
+
+  chatHistory.push({ role:'user', content: msg });
+
+  try {
+    const sysPrompt = `Bạn là gia sư dạy lập trình nhúng IoT cho người Việt Nam mới học. Học viên đang học bài: "${TITLES[currentLesson]}".
+Quy tắc:
+- Luôn trả lời bằng tiếng Việt, đơn giản như dạy người chưa biết gì
+- Dùng analogie thực tế khi giải thích khái niệm
+- Khi có code, thêm comment tiếng Việt
+- Trả lời ngắn gọn đủ ý (150-350 từ)
+- Khuyến khích thực hành`;
+
+   // Gọi API nội bộ của Vercel
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-3-haiku-20240307', // Cập nhật lại model phù hợp
+        max_tokens: 1000,
+        system: sysPrompt,
+        messages: chatHistory,
+      })
+    });
+
+    if (resp.status === 401) {
+      hideTyping();
+      document.getElementById('api-notice').style.display = 'block';
+      addMsg('ai', '⚠️ Cần API key của Anthropic để dùng tính năng AI. Nhập key vào ô bên dưới (lấy miễn phí tại console.anthropic.com).');
+      chatHistory.pop();
+      return;
+    }
+
+    const data = await resp.json();
+    const reply = (data.content || []).map(b => b.type==='text'?b.text:'').join('');
+    hideTyping();
+    addMsg('ai', reply || 'Xin lỗi, có lỗi xảy ra.');
+    chatHistory.push({ role:'assistant', content: reply });
+  } catch(e) {
+    hideTyping();
+    // Try without API key (Claude artifact context)
+    addMsg('ai', '⚠️ Không kết nối được server AI. Kiểm tra internet và thử lại.');
+    chatHistory.pop();
+  } finally {
+    isTyping = false;
+    document.getElementById('send-btn').disabled = false;
+  }
+}
+
+function saveKey() {
+  apiKey = document.getElementById('api-key-input').value.trim();
+  if (apiKey) {
+    document.getElementById('api-notice').style.display = 'none';
+    addMsg('ai', '✓ Đã lưu API key! Bây giờ bạn có thể hỏi tôi bất cứ điều gì.');
+  }
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+// Init
+reinitPage();
+</script>
+</body>
+</html>
